@@ -1,0 +1,96 @@
+<h1>Character Sheet</h1>
+<p>Here is the character sheet...</p>
+
+<h3>Cost: {{cost}}</h3>
+
+<h3>Attributes</h3>
+<table>
+	<tr>
+		<td>
+			ST
+		</td>
+		<td>
+			DX
+		</td>
+		<td>
+			IQ
+		</td>
+		<td>
+			HT
+		</td>
+		<td>
+			HP
+		</td>
+		<td>
+			WILL
+		</td>
+		<td>
+			PER
+		</td>
+		<td>
+			FP
+		</td>
+	</tr>
+	<tr>
+		<td>
+			{{st}}
+		</td>
+		<td>
+			{{dx}}
+		</td>
+		<td>
+			{{iq}}
+		</td>
+		<td>
+			{{ht}}
+		</td>
+		<td>
+			{{hp}}
+		</td>
+		<td>
+			10
+		</td>
+		<td>
+			10
+		</td>
+		<td>
+			10
+		</td>
+	</tr>
+	<tr>
+		<td><button (click)="increaseAttr('st')">+</button><button (click)="decreaseAttr('st')">-</button></td>
+		<td><button (click)="increaseAttr('dx')">+</button><button (click)="decreaseAttr('dx')">-</button></td>
+		<td><button (click)="increaseAttr('iq')">+</button><button (click)="decreaseAttr('iq')">-</button></td>
+		<td><button (click)="increaseAttr('ht')">+</button><button (click)="decreaseAttr('ht')">-</button></td>
+		<td><button (click)="increaseModifier('hp')">+</button><button (click)="decreaseModifier('hp')">-</button></td>
+	</tr>
+</table>
+<hr/>
+<table>
+	<tr>
+		<td>BASIC LIFT</td>
+		<td>DAMAGE Thr</td>
+		<td>Sw</td>
+		<td>BASIC SPEED</td>
+		<td>BASIC MOVE</td>
+	</tr>
+	<tr>
+		<td>{{basicLift}}</td>
+		<td>{{damageThr}}</td>
+		<td>{{damageSw}}</td>
+		<td>{{basicSpeed}}</td>
+		<td>{{basicMove}}</td>
+	</tr>
+</table>
+<hr/>
+<table>
+	<tr>
+		<td>SIZE MODIFIER</td>
+	</tr>
+	<tr>
+		<td>{{size}}</td>
+	</tr>
+	<tr>
+		<td><button (click)="increaseModifier('size')">+</button><button (click)="decreaseModifier('size')">-</button></td>
+	</tr>
+</table>
