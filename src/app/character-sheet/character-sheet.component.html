@@ -48,13 +48,13 @@
 			{{hp}}
 		</td>
 		<td>
-			10
+			{{will}}
 		</td>
 		<td>
-			10
+			{{per}}
 		</td>
 		<td>
-			10
+			{{fp}}
 		</td>
 	</tr>
 	<tr>
@@ -63,6 +63,9 @@
 		<td><button (click)="increaseAttr('iq')">+</button><button (click)="decreaseAttr('iq')">-</button></td>
 		<td><button (click)="increaseAttr('ht')">+</button><button (click)="decreaseAttr('ht')">-</button></td>
 		<td><button (click)="increaseModifier('hp')">+</button><button (click)="decreaseModifier('hp')">-</button></td>
+		<td><button (click)="increaseModifier('will')">+</button><button (click)="decreaseModifier('will')">-</button></td>
+		<td><button (click)="increaseModifier('per')">+</button><button (click)="decreaseModifier('per')">-</button></td>
+		<td><button (click)="increaseModifier('fp')">+</button><button (click)="decreaseModifier('fp')">-</button></td>
 	</tr>
 </table>
 <hr/>
@@ -75,11 +78,18 @@
 		<td>BASIC MOVE</td>
 	</tr>
 	<tr>
-		<td>{{basicLift}}</td>
+		<td>{{basicLift}} lbs</td>
 		<td>{{damageThr}}</td>
 		<td>{{damageSw}}</td>
-		<td>{{basicSpeed}}</td>
-		<td>{{basicMove}}</td>
+		<td>{{basicspeed}}</td>
+		<td>{{basicmove}} yards/second</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td><button (click)="increaseModifier('basicspeed')">+</button><button (click)="decreaseModifier('basicspeed')">-</button></td>
+		<td><button (click)="increaseModifier('basicmove')">+</button><button (click)="decreaseModifier('basicmove')">-</button></td>
 	</tr>
 </table>
 <hr/>
@@ -92,5 +102,56 @@
 	</tr>
 	<tr>
 		<td><button (click)="increaseModifier('size')">+</button><button (click)="decreaseModifier('size')">-</button></td>
+	</tr>
+</table>
+<hr/>
+<table>
+	<tr>
+		<td>ENCUMBRANCE</td>
+		<td></td>
+		<td>MOVE</td>
+		<td></td>
+		<td>DODGE</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>None (0) = BL</td>
+		<td>{{basicLift}} lbs</td>
+		<td>BM x 1</td>
+		<td>{{basicmove}} yards/second</td>
+		<td>Dodge</td>
+		<td>{{dodge}}</td>
+	</tr>
+	<tr>
+		<td>Light (1) = 2 x BL</td>
+		<td>{{enc1BasicLift}} lbs</td>
+		<td>BM x 0.8</td>
+		<td>{{enc1BasicMove}} yards/second</td>
+		<td>Dodge -1</td>
+		<td>{{enc1Dodge}}</td>
+	</tr>
+	<tr>
+		<td>Medium (2) = 3 x BL</td>
+		<td>{{enc2BasicLift}} lbs</td>
+		<td>BM x 0.6</td>
+		<td>{{enc2BasicMove}} yards/second</td>
+		<td>Dodge -2</td>
+		<td>{{enc2Dodge}}</td>
+	</tr>
+	<tr>
+		<td>Heavy (3) = 6 x BL</td>
+		<td>{{enc3BasicLift}} lbs</td>
+		<td>BM x 0.4</td>
+		<td>{{enc3BasicMove}} yards/second</td>
+		<td>Dodge -3</td>
+		<td>{{enc3Dodge}}</td>
+	</tr>
+	<tr>
+		<td>X-Heavy (4) = 10 x BL</td>
+		<td>{{enc4BasicLift}} lbs</td>
+		<td>BM x 0.2</td>
+		<td>{{enc4BasicMove}} yards/second</td>
+		<td>Dodge -4</td>
+		<td>{{enc4Dodge}}</td>
 	</tr>
 </table>
