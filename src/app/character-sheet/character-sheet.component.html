@@ -1,9 +1,51 @@
 <h1>Character Sheet</h1>
 <p>Here is the character sheet...</p>
 
-<h3>Cost: {{cost}}</h3>
-
-<h3>Attributes</h3>
+<table>
+	<tr>
+		<td>NAME</td>
+		<td>PLAYER</td>
+		<td>POINT TOTAL</td>
+	</tr>
+	<tr>
+		<td><input [value]="name" (input)="name = $event.target.value"/></td>
+		<td><input [value]="player" (input)="player = $event.target.value"/></td>
+		<td>{{pointTotal}}</td>
+	</tr>
+	<tr>
+		<td>HEIGHT</td>
+		<td>WEIGHT</td>
+		<td>SIZE MODIFIER</td>
+		<td>UNSPENT POINTS</td>
+	</tr>
+	<tr>
+		<td><input [value]="height" (input)="height = $event.target.value"/></td>
+		<td><input [value]="weight" (input)="weight = $event.target.value"/> lbs</td>
+		<td>{{size}}</td>
+		<td>{{unspentPoints}}</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+		<td><button (click)="increaseModifier('size')">+</button><button (click)="decreaseModifier('size')">-</button></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>APPEARANCE</td>
+		<td>BUILD</td>
+	</tr>
+	<tr>
+		<td><input [value]="appearance" (input)="appearance = $event.target.value"/></td>
+		<td><select [value]="build" (input)="build = $event.target.value">
+			<option value=0>Skinny</option>
+			<option value=1>Average</option>
+			<option value=2>Overweight</option>
+			<option value=3>Fat</option>
+			<option value=4>Very Fat</option>
+		</select></td>
+	</tr>
+</table>
+<hr/>
 <table>
 	<tr>
 		<td>
@@ -90,18 +132,6 @@
 		<td></td>
 		<td><button (click)="increaseModifier('basicspeed')">+</button><button (click)="decreaseModifier('basicspeed')">-</button></td>
 		<td><button (click)="increaseModifier('basicmove')">+</button><button (click)="decreaseModifier('basicmove')">-</button></td>
-	</tr>
-</table>
-<hr/>
-<table>
-	<tr>
-		<td>SIZE MODIFIER</td>
-	</tr>
-	<tr>
-		<td>{{size}}</td>
-	</tr>
-	<tr>
-		<td><button (click)="increaseModifier('size')">+</button><button (click)="decreaseModifier('size')">-</button></td>
 	</tr>
 </table>
 <hr/>

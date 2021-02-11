@@ -7,6 +7,9 @@ import { LookupTablesService } from '../lookup-tables.service';
   styleUrls: ['./character-sheet.component.scss'],
 })
 export class CharacterSheetComponent implements OnInit {
+  // TODO: Allow configuration
+  STARTING_POINTS = 125;
+
   // COSTS
   ST_COST = 10;
   DX_COST = 20;
@@ -36,6 +39,14 @@ export class CharacterSheetComponent implements OnInit {
   costFromFPModifier = 0;
   costFromBASICSPEEDModifier = 0;
   costFromBASICMOVEModifier = 0;
+
+  // DESCRIPTORS
+  name = '';
+  player = '';
+  height = '';
+  weight = '';
+  appearance = '';
+  build = 1;
 
   // BASIC ATTRIBUTES
   st = 10;
@@ -112,7 +123,24 @@ export class CharacterSheetComponent implements OnInit {
     return this.costFromHPModifier * sizeModifierDiscount;
   }
 
-  get cost() {
+  // TODO: Why the eff doesn't === work here?
+  calculatedCostFromBuild() {
+    if (this.build == 0) {
+      return -5;
+    }
+    if (this.build == 2) {
+      return -1;
+    }
+    if (this.build == 3) {
+      return -3;
+    }
+    if (this.build == 4) {
+      return -5;
+    }
+    return 0;
+  }
+
+  get pointTotal() {
     return (
       this.calculatedCostFromST() +
       this.costFromDX +
@@ -123,7 +151,8 @@ export class CharacterSheetComponent implements OnInit {
       this.costFromPERModifier +
       this.costFromFPModifier +
       this.costFromBASICSPEEDModifier +
-      this.costFromBASICMOVEModifier
+      this.costFromBASICMOVEModifier +
+      this.calculatedCostFromBuild()
     );
   }
 
@@ -216,5 +245,9 @@ export class CharacterSheetComponent implements OnInit {
   }
   get enc4Dodge() {
     return this.dodge - 4;
+  }
+
+  get unspentPoints() {
+    return this.STARTING_POINTS - this.pointTotal;
   }
 }
