@@ -4,6 +4,33 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class LookupTablesService {
+  private COST_TABLE = {
+    st: 10,
+    dx: 20,
+    iq: 20,
+    ht: 10,
+    hp: 2,
+    will: 5,
+    per: 5,
+    fp: 3,
+    basicSpeed: 5,
+    basicMove: 5,
+    size: 0,
+    build0: -5,
+    build1: 0,
+    build2: -1,
+    build3: -3,
+    build4: -5
+  };
+
+  private INCREMENT_TABLE = {
+    basicSpeed: .25
+  };
+
+  private MAX_DISCOUNT_TABLE = {
+    st: .8
+  }
+
   private DAMAGE_TABLE = {
     1: { thr: '1d-6', sw: '1d-5' },
     3: { thr: '1d-5', sw: '1d-4' },
@@ -48,6 +75,18 @@ export class LookupTablesService {
     100: { thr: '11d', sw: '13d' },
   };
   constructor() {}
+
+  cost(stat: string) {
+    return this.COST_TABLE[stat];
+  }
+
+  increment(stat: string) {
+    return (stat in this.INCREMENT_TABLE) ? this.INCREMENT_TABLE[stat] : 1;
+  }
+
+  maxDiscount(stat: string) {
+    return (stat in this.MAX_DISCOUNT_TABLE) ? this.MAX_DISCOUNT_TABLE[stat] : 1;
+  }
 
   private damage(st: number) {
     if (st < 1) {

@@ -27,7 +27,7 @@
 	<tr>
 		<td></td>
 		<td></td>
-		<td><button (click)="increaseModifier('size')">+</button><button (click)="decreaseModifier('size')">-</button></td>
+		<td><button (click)="increaseStat('size')">+</button><button (click)="decreaseStat('size')">-</button></td>
 		<td></td>
 	</tr>
 	<tr>
@@ -100,14 +100,14 @@
 		</td>
 	</tr>
 	<tr>
-		<td><button (click)="increaseAttr('st')">+</button><button (click)="decreaseAttr('st')">-</button></td>
-		<td><button (click)="increaseAttr('dx')">+</button><button (click)="decreaseAttr('dx')">-</button></td>
-		<td><button (click)="increaseAttr('iq')">+</button><button (click)="decreaseAttr('iq')">-</button></td>
-		<td><button (click)="increaseAttr('ht')">+</button><button (click)="decreaseAttr('ht')">-</button></td>
-		<td><button (click)="increaseModifier('hp')">+</button><button (click)="decreaseModifier('hp')">-</button></td>
-		<td><button (click)="increaseModifier('will')">+</button><button (click)="decreaseModifier('will')">-</button></td>
-		<td><button (click)="increaseModifier('per')">+</button><button (click)="decreaseModifier('per')">-</button></td>
-		<td><button (click)="increaseModifier('fp')">+</button><button (click)="decreaseModifier('fp')">-</button></td>
+		<td><button (click)="increaseStat('st')">+</button><button (click)="decreaseStat('st', 1)">-</button></td>
+		<td><button (click)="increaseStat('dx')">+</button><button (click)="decreaseStat('dx', 1)">-</button></td>
+		<td><button (click)="increaseStat('iq')">+</button><button (click)="decreaseStat('iq', 1)">-</button></td>
+		<td><button (click)="increaseStat('ht')">+</button><button (click)="decreaseStat('ht', 1)">-</button></td>
+		<td><button (click)="increaseStat('hp')">+</button><button (click)="decreaseStat('hp')">-</button></td>
+		<td><button (click)="increaseStat('will')">+</button><button (click)="decreaseStat('will')">-</button></td>
+		<td><button (click)="increaseStat('per')">+</button><button (click)="decreaseStat('per')">-</button></td>
+		<td><button (click)="increaseStat('fp')">+</button><button (click)="decreaseStat('fp')">-</button></td>
 	</tr>
 </table>
 <hr/>
@@ -123,15 +123,15 @@
 		<td>{{basicLift}} lbs</td>
 		<td>{{damageThr}}</td>
 		<td>{{damageSw}}</td>
-		<td>{{basicspeed}}</td>
-		<td>{{basicmove}} yards/second</td>
+		<td>{{basicSpeed}}</td>
+		<td>{{basicMove}} yards/second</td>
 	</tr>
 	<tr>
 		<td></td>
 		<td></td>
 		<td></td>
-		<td><button (click)="increaseModifier('basicspeed')">+</button><button (click)="decreaseModifier('basicspeed')">-</button></td>
-		<td><button (click)="increaseModifier('basicmove')">+</button><button (click)="decreaseModifier('basicmove')">-</button></td>
+		<td><button (click)="increaseStat('basicSpeed')">+</button><button (click)="decreaseStat('basicSpeed')">-</button></td>
+		<td><button (click)="increaseStat('basicMove')">+</button><button (click)="decreaseStat('basicMove')">-</button></td>
 	</tr>
 </table>
 <hr/>
@@ -148,7 +148,7 @@
 		<td>None (0) = BL</td>
 		<td>{{basicLift}} lbs</td>
 		<td>BM x 1</td>
-		<td>{{basicmove}} yards/second</td>
+		<td>{{basicMove}} yards/second</td>
 		<td>Dodge</td>
 		<td>{{dodge}}</td>
 	</tr>

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { LookupTablesService } from '../lookup-tables.service';
+import { Modifier, ModifierGroup } from '../classes/Modifier';
 
 @Component({
   selector: 'app-character-sheet',
@@ -10,35 +11,8 @@ export class CharacterSheetComponent implements OnInit {
   // TODO: Allow configuration
   STARTING_POINTS = 125;
 
-  // COSTS
-  ST_COST = 10;
-  DX_COST = 20;
-  IQ_COST = 20;
-  HT_COST = 10;
-
-  // MODIFIER COSTS
-  HP_MODIFIER_COST = 2;
-  WILL_MODIFIER_COST = 5;
-  PER_MODIFIER_COST = 5;
-  FP_MODIFIER_COST = 3;
-  BASICSPEED_MODIFIER_COST = 5;
-  BASICMOVE_MODIFIER_COST = 5;
-  SIZE_MODIFIER_COST = 0;
-
-  // UNIQUE INCREMENTS
-  BASICSPEED_MODIFIER_INCREMENT = 0.25;
-
-  // CALCULATED COSTS (attribute is all-caps)
-  costFromST = 0;
-  costFromDX = 0;
-  costFromIQ = 0;
-  costFromHT = 0;
-  costFromHPModifier = 0;
-  costFromWILLModifier = 0;
-  costFromPERModifier = 0;
-  costFromFPModifier = 0;
-  costFromBASICSPEEDModifier = 0;
-  costFromBASICMOVEModifier = 0;
+  deltas = new Map();
+  activeModifiers: ModifierGroup = new ModifierGroup();
 
   // DESCRIPTORS
   name = '';
@@ -48,112 +22,72 @@ export class CharacterSheetComponent implements OnInit {
   appearance = '';
   build = 1;
 
-  // BASIC ATTRIBUTES
-  st = 10;
-  dx = 10;
-  iq = 10;
-  ht = 10;
-
-  // MODIFIERS
-  hpModifier = 0;
-  willModifier = 0;
-  sizeModifier = 0;
-  perModifier = 0;
-  fpModifier = 0;
-  basicspeedModifier = 0;
-  basicmoveModifier = 0;
-
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
 
-  increaseAttr(attr: string) {
-    const upperAttr = attr.toUpperCase();
-    const incrProp = upperAttr + '_INCREMENT';
-    const increment = incrProp in this ? this[incrProp] : 1;
-    this[attr] += increment;
-    this['costFrom' + upperAttr] += this[upperAttr + '_COST'];
+  increaseStat(stat: string) {
+    if (!(this.deltas.has(stat))) {
+      this.deltas.set(stat, 0);
+    }
+    this.deltas.set(stat, this.deltas.get(stat) + this.lookupTables.increment(stat));
+
+    // Special Case: Size modifier adds discount for ST and HP costs
+    if (stat === 'size') {
+      this.setSizeModifierDiscount();
+    }
   }
-  decreaseAttr(attr: string) {
-    if (this[attr] === 1) {
+  decreaseStat(stat: string, minValue?: number) {
+    if (minValue && this[stat] === minValue) {
       return;
     }
-    const upperAttr = attr.toUpperCase();
-    const incrProp = upperAttr + '_INCREMENT';
-    const increment = incrProp in this ? this[incrProp] : 1;
-    this[attr] -= increment;
-    this['costFrom' + upperAttr] -= this[upperAttr + '_COST'];
-  }
-
-  increaseModifier(attr: string) {
-    const upperAttr = attr.toUpperCase();
-    const incrProp = upperAttr + '_MODIFIER_INCREMENT';
-    const increment = incrProp in this ? this[incrProp] : 1;
-    this[attr + 'Modifier'] += increment;
-    this['costFrom' + upperAttr + 'Modifier'] += this[
-      upperAttr + '_MODIFIER_COST'
-    ];
-  }
-  decreaseModifier(attr: string) {
-    const upperAttr = attr.toUpperCase();
-    const incrProp = upperAttr + '_MODIFIER_INCREMENT';
-    const increment = incrProp in this ? this[incrProp] : 1;
-    this[attr + 'Modifier'] -= increment;
-    this['costFrom' + upperAttr + 'Modifier'] -= this[
-      upperAttr + '_MODIFIER_COST'
-    ];
-  }
-
-  calculatedCostFromST() {
-    if (this.sizeModifier === 0) {
-      return this.costFromST;
+    if (!(this.deltas.has(stat))) {
+      this.deltas.set(stat, 0);
     }
-    const effectiveSizeModifier = this.sizeModifier > 8 ? 8 : this.sizeModifier;
+    this.deltas.set(stat, this.deltas.get(stat) - this.lookupTables.increment(stat));
+
+    // Special Case: Size modifier subtracts discount for ST and HP costs
+    if (stat === 'size') {
+      this.setSizeModifierDiscount();
+    }
+  }
+
+  setSizeModifierDiscount() {
+    const sizeModifier = this.deltas.get('size');
+    const effectiveSizeModifier = sizeModifier > 8 ? 8 : sizeModifier;
     const sizeModifierDiscount = effectiveSizeModifier * 0.1;
-    // TODO: Add appropriate rounding rules
-    return this.costFromST * sizeModifierDiscount;
+    this.activeModifiers.setModifier('st', 0, 0, sizeModifierDiscount, 'size');
+    this.activeModifiers.setModifier('hp', 0, 0, sizeModifierDiscount, 'size');
   }
 
-  calculatedCostFromHPModifier() {
-    if (this.sizeModifier === 0) {
-      return this.costFromHPModifier;
+  moddedValue(basicValue: number, stat: string) {
+    if (this.deltas.has(stat)) {
+      return basicValue + this.deltas.get(stat);
     }
-    const effectiveSizeModifier = this.sizeModifier > 8 ? 8 : this.sizeModifier;
-    const sizeModifierDiscount = effectiveSizeModifier * 0.1;
-    // TODO: Add appropriate rounding rules
-    return this.costFromHPModifier * sizeModifierDiscount;
-  }
-
-  // TODO: Why the eff doesn't === work here?
-  calculatedCostFromBuild() {
-    if (this.build == 0) {
-      return -5;
-    }
-    if (this.build == 2) {
-      return -1;
-    }
-    if (this.build == 3) {
-      return -3;
-    }
-    if (this.build == 4) {
-      return -5;
-    }
-    return 0;
+    return basicValue;
   }
 
   get pointTotal() {
-    return (
-      this.calculatedCostFromST() +
-      this.costFromDX +
-      this.costFromIQ +
-      this.costFromHT +
-      this.calculatedCostFromHPModifier() +
-      this.costFromWILLModifier +
-      this.costFromPERModifier +
-      this.costFromFPModifier +
-      this.costFromBASICSPEEDModifier +
-      this.costFromBASICMOVEModifier +
-      this.calculatedCostFromBuild()
-    );
+    let pointTotal = 0;
+    this.deltas.forEach((delta, stat) => {
+      const cost = (delta * (this.lookupTables.cost(stat) / this.lookupTables.increment(stat)));
+      const discount = this.activeModifiers.getTotalDiscount(stat, this.lookupTables.maxDiscount(stat));
+      pointTotal += Math.round(cost - (cost * discount));
+    });
+    pointTotal += this.lookupTables.cost('build' + this.build);
+    return pointTotal;
+  }
+
+  get st() {
+    return this.moddedValue(10, 'st');
+  }
+  get dx() {
+    return this.moddedValue(10, 'dx');
+  }
+  get iq() {
+    return this.moddedValue(10, 'iq');
+  }
+  get ht() {
+    return this.moddedValue(10, 'ht');
   }
 
   get basicLift() {
@@ -172,46 +106,47 @@ export class CharacterSheetComponent implements OnInit {
     return this.lookupTables.swingDamage(this.st);
   }
 
-  get basicspeed() {
-    return (this.ht + this.dx) / 4 + this.basicspeedModifier;
+  get basicSpeed() {
+    return this.moddedValue((this.ht + this.dx) / 4, 'basicSpeed');
   }
 
-  get basicmove() {
-    return Math.floor(this.basicspeed) + this.basicmoveModifier;
+  get basicMove() {
+    return this.moddedValue(Math.floor(this.basicSpeed), 'basicMove');
   }
 
   get hp() {
-    return this.st + this.hpModifier;
+    return this.moddedValue(this.st, 'hp');
   }
 
   get will() {
-    return this.iq + this.willModifier;
+    return this.moddedValue(this.iq, 'will');
   }
 
   get per() {
-    return this.iq + this.perModifier;
+    return this.moddedValue(this.iq, 'per');
   }
 
   get fp() {
-    return this.ht + this.fpModifier;
+    return this.moddedValue(this.ht, 'fp');
   }
 
   get size() {
-    if (this.sizeModifier > 0) {
-      return '+' + this.sizeModifier;
+    const sizeModifier = this.moddedValue(0, 'size');
+    if (sizeModifier > 0) {
+      return '+' + sizeModifier;
     }
-    return this.sizeModifier;
+    return sizeModifier;
   }
 
   get dodge() {
-    return Math.floor(this.basicspeed + 3);
+    return Math.floor(this.basicSpeed + 3);
   }
 
   get enc1BasicLift() {
     return this.basicLift * 2;
   }
   get enc1BasicMove() {
-    return Math.floor(this.basicmove * 0.8);
+    return Math.floor(this.basicMove * 0.8);
   }
   get enc1Dodge() {
     return this.dodge - 1;
@@ -221,7 +156,7 @@ export class CharacterSheetComponent implements OnInit {
     return this.basicLift * 3;
   }
   get enc2BasicMove() {
-    return Math.floor(this.basicmove * 0.6);
+    return Math.floor(this.basicMove * 0.6);
   }
   get enc2Dodge() {
     return this.dodge - 2;
@@ -231,7 +166,7 @@ export class CharacterSheetComponent implements OnInit {
     return this.basicLift * 6;
   }
   get enc3BasicMove() {
-    return Math.floor(this.basicmove * 0.4);
+    return Math.floor(this.basicMove * 0.4);
   }
   get enc3Dodge() {
     return this.dodge - 3;
@@ -241,7 +176,7 @@ export class CharacterSheetComponent implements OnInit {
     return this.basicLift * 10;
   }
   get enc4BasicMove() {
-    return Math.floor(this.basicmove * 0.2);
+    return Math.floor(this.basicMove * 0.2);
   }
   get enc4Dodge() {
     return this.dodge - 4;
