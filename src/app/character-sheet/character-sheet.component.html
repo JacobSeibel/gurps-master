@@ -32,10 +32,30 @@
 	</tr>
 	<tr>
 		<td>APPEARANCE</td>
+		<td>DESCRIPTION</td>
 		<td>BUILD</td>
 	</tr>
 	<tr>
-		<td><input [value]="appearance" (input)="appearance = $event.target.value"/></td>
+		<td>
+			<select [value]="appearance" (input)="appearance = $event.target.value">
+				<option value=0>Horrific</option>
+				<option value=1>Monstrous</option>
+				<option value=2>Hideous</option>
+				<option value=3>Ugly</option>
+				<option value=4>Unattractive</option>
+				<option value=5>Average</option>
+				<option value=6>Attractive</option>
+				<option value=7>Handsome/Beautiful</option>
+				<option value=8>Very Handsome/Beautiful</option>
+				<option value=9>Transcendent</option>
+			</select>
+			<br>
+			<input type="checkbox" [checked]= "androgynous" (change)= "androgynous = !androgynous"> Androgynous <br>
+			<input type="checkbox" [checked]= "impressive" (change)= "impressive = !impressive"> Impressive <br>
+			<input type="checkbox" [checked]= "universal" (change)= "universal = !universal"> Universal <br>
+			<input type="checkbox" [checked]= "offTheShelfLooks" (change)= "offTheShelfLooks = !offTheShelfLooks"> Off-the-Shelf Looks
+		</td>
+		<td><input [value]="appearanceDescription" (input)="appearanceDescription = $event.target.value"/></td>
 		<td><select [value]="build" (input)="build = $event.target.value">
 			<option value=0>Skinny</option>
 			<option value=1>Average</option>

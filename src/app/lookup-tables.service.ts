@@ -20,7 +20,17 @@ export class LookupTablesService {
     build1: 0,
     build2: -1,
     build3: -3,
-    build4: -5
+    build4: -5,
+    appearance0: -24,
+    appearance1: -20,
+    appearance2: -16,
+    appearance3: -8,
+    appearance4: -4,
+    appearance5: 0,
+    appearance6: 4,
+    appearance7: 8,
+    appearance8: 16,
+    appearance9: 20
   };
 
   private INCREMENT_TABLE = {

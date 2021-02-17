@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { LookupTablesService } from '../lookup-tables.service';
-import { Modifier, ModifierGroup } from '../classes/Modifier';
+import { ModifierGroup } from '../classes/Modifier';
 
 @Component({
   selector: 'app-character-sheet',
@@ -19,8 +19,15 @@ export class CharacterSheetComponent implements OnInit {
   player = '';
   height = '';
   weight = '';
-  appearance = '';
+  appearanceDescription = '';
+  appearance = 5;
   build = 1;
+
+  // APPEARANCE CHECKBOXES
+  androgynous = false;
+  impressive = false;
+  universal = false;
+  offTheShelfLooks = false;
 
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
@@ -66,6 +73,13 @@ export class CharacterSheetComponent implements OnInit {
     return basicValue;
   }
 
+  appearancePointTotal() {
+    const total = this.lookupTables.cost('appearance' + this.appearance);
+    let discount = this.universal ? -.25 : 0;
+    discount += this.offTheShelfLooks ? .5 : 0;
+    return Math.round(total - (total * discount));
+  }
+
   get pointTotal() {
     let pointTotal = 0;
     this.deltas.forEach((delta, stat) => {
@@ -74,6 +88,7 @@ export class CharacterSheetComponent implements OnInit {
       pointTotal += Math.round(cost - (cost * discount));
     });
     pointTotal += this.lookupTables.cost('build' + this.build);
+    pointTotal += this.appearancePointTotal();
     return pointTotal;
   }
 
