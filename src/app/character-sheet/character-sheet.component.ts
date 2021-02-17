@@ -92,6 +92,10 @@ export class CharacterSheetComponent implements OnInit {
     return pointTotal;
   }
 
+  get personalTechLevel() {
+    return this.moddedValue(0, 'personalTechLevel');
+  }
+
   get st() {
     return this.moddedValue(10, 'st');
   }

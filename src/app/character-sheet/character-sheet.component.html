@@ -1,34 +1,34 @@
 <h1>Character Sheet</h1>
-<p>Here is the character sheet...</p>
-
 <table>
 	<tr>
 		<td>NAME</td>
 		<td>PLAYER</td>
 		<td>POINT TOTAL</td>
+		<td>UNSPENT POINTS</td>
 	</tr>
 	<tr>
 		<td><input [value]="name" (input)="name = $event.target.value"/></td>
 		<td><input [value]="player" (input)="player = $event.target.value"/></td>
 		<td>{{pointTotal}}</td>
+		<td>{{unspentPoints}}</td>
 	</tr>
 	<tr>
 		<td>HEIGHT</td>
 		<td>WEIGHT</td>
 		<td>SIZE MODIFIER</td>
-		<td>UNSPENT POINTS</td>
+		<td>PERSONAL TECH LEVEL</td>
 	</tr>
 	<tr>
 		<td><input [value]="height" (input)="height = $event.target.value"/></td>
 		<td><input [value]="weight" (input)="weight = $event.target.value"/> lbs</td>
 		<td>{{size}}</td>
-		<td>{{unspentPoints}}</td>
+		<td>{{personalTechLevel}}</td>
 	</tr>
 	<tr>
 		<td></td>
 		<td></td>
 		<td><button (click)="increaseStat('size')">+</button><button (click)="decreaseStat('size')">-</button></td>
-		<td></td>
+		<td><button (click)="increaseStat('personalTechLevel')">+</button><button (click)="decreaseStat('personalTechLevel')">-</button></td>
 	</tr>
 	<tr>
 		<td>APPEARANCE</td>
