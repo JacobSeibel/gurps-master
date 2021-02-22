@@ -205,3 +205,29 @@
 		<td>{{enc4Dodge}}</td>
 	</tr>
 </table>
+<hr/>
+<h3>LANGUAGES</h3>
+<table>
+	<tr>
+		<td>NAME</td>
+		<td>COMPREHENSION</td>
+		<td>COST</td>
+	</tr>
+	<tr *ngFor="let language of languages">
+		<td><input [value]="language.name" (change)="updateLanguageName($event.target, language)"/></td>
+		<td><select [value]="language.comprehension" (change)="updateLanguageComprehension($event.target, language)">
+			<option value=0>Broken</option>
+			<option value=1>Accented</option>
+			<option value=2>Native</option>
+		</select></td>
+	</tr>
+	<tr>
+		<td><input [value]="newLanguageName" (change)="updateLanguageName($event.target.value)"/></td>
+		<td><select [value]="newLanguageComprehension" (change)="updateLanguageComprehension($event.target.value)">
+			<option></option>
+			<option value=0>Broken</option>
+			<option value=1>Accented</option>
+			<option value=2>Native</option>
+		</select></td>
+	</tr>
+</table>

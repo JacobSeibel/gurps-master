@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LookupTablesService } from '../lookup-tables.service';
 import { ModifierGroup } from '../classes/Modifier';
+import { Language } from '../classes/Language';
 
 @Component({
   selector: 'app-character-sheet',
@@ -28,6 +29,10 @@ export class CharacterSheetComponent implements OnInit {
   impressive = false;
   universal = false;
   offTheShelfLooks = false;
+
+  languages: Language[] = [];
+  newLanguageName = '';
+  newLanguageComprehension;
 
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
@@ -78,6 +83,36 @@ export class CharacterSheetComponent implements OnInit {
     let discount = this.universal ? -.25 : 0;
     discount += this.offTheShelfLooks ? .5 : 0;
     return Math.round(total - (total * discount));
+  }
+
+  updateLanguageName(name: string, language?: Language) {
+    if (!language) {
+      this.newLanguageName = name;
+      if (this.newLanguageComprehension) {
+        const newLanguage = new Language(this.newLanguageName, this.newLanguageComprehension);
+        this.languages.push(newLanguage);
+        this.newLanguageName = '';
+        this.newLanguageComprehension = null;
+        console.log("New language!");
+      }
+    } else {
+      language.name = name;
+    }
+  }
+
+  updateLanguageComprehension(comprehension: number, language?: Language) {
+    if (!language) {
+      this.newLanguageComprehension = comprehension;
+      if (this.newLanguageName !== '') {
+        const newLanguage = new Language(this.newLanguageName, this.newLanguageComprehension);
+        this.languages.push(newLanguage);
+        console.log("New language!  " + this.newLanguageName + " " + this.newLanguageComprehension);
+        this.newLanguageName = '';
+        this.newLanguageComprehension = null;
+      }
+    } else {
+      language.comprehension = comprehension;
+    }
   }
 
   get pointTotal() {
