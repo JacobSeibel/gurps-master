@@ -30,10 +30,15 @@ export class CharacterSheetComponent implements OnInit {
   universal = false;
   offTheShelfLooks = false;
 
+  // LANGUAGE
   languages: Language[] = [];
   newLanguageName = '';
   newLanguageSpokenComprehension = 3;
   newLanguageWrittenComprehension;
+
+  // WEALTH AND STATUS
+  wealth: number = 3;
+  multimillionaireLevel: number = 1;
 
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
@@ -146,6 +151,25 @@ export class CharacterSheetComponent implements OnInit {
     this.languages.splice(this.languages.indexOf(language), 1);
   }
 
+  increaseMultimillionaireLevel() {
+    this.multimillionaireLevel++;
+  }
+
+  decreaseMultimillionaireLevel() {
+    if(this.multimillionaireLevel > 1)
+      this.multimillionaireLevel--;
+  }
+
+  getWealthCost() {
+    let multimillionaireExtraCost = 0;
+    let effectiveWealthLevel = this.wealth;
+    if (this.wealth == 8) {
+      multimillionaireExtraCost = this.lookupTables.cost('wealth8') * this.multimillionaireLevel;
+      effectiveWealthLevel = 7;
+    }
+    return this.lookupTables.cost('wealth' + effectiveWealthLevel) + multimillionaireExtraCost;
+  }
+
   get pointTotal() {
     let pointTotal = 0;
     this.deltas.forEach((delta, stat) => {
@@ -156,6 +180,7 @@ export class CharacterSheetComponent implements OnInit {
     pointTotal += this.lookupTables.cost('build' + this.build);
     pointTotal += this.appearancePointTotal();
     pointTotal += this.languagePointTotal();
+    pointTotal += this.getWealthCost();
     return pointTotal;
   }
 

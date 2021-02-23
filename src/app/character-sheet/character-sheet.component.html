@@ -217,19 +217,17 @@
 	<tr *ngFor="let language of languages; let i = index">
 		<td><input [value]="language.name" (change)="updateLanguageName($event.target.value, language)"/></td>
 		<td><select [value]="language.spokenComprehension" (change)="updateLanguageSpokenComprehension($event.target.value, language)">
-				<option value=0>None</option>
-				<option value=1>Broken</option>
-				<option value=2>Accented</option>
-				<option value=3>Native</option>
-			</select>
-		</td>
+			<option value=0>None</option>
+			<option value=1>Broken</option>
+			<option value=2>Accented</option>
+			<option value=3>Native</option>
+		</select></td>
 		<td><select [value]="language.writtenComprehension" (change)="updateLanguageWrittenComprehension($event.target.value, language)">
-				<option value=0>None</option>
-				<option value=1>Broken</option>
-				<option value=2>Accented</option>
-				<option value=3>Native</option>
-			</select>
-		</td>
+			<option value=0>None</option>
+			<option value=1>Broken</option>
+			<option value=2>Accented</option>
+			<option value=3>Native</option>
+		</select></td>
 		<td>
 			<span>{{getLanguageCost(language, i === 0)}}</span>
 		</td>
@@ -238,20 +236,47 @@
 	<tr>
 		<td><input [value]="newLanguageName" (change)="updateLanguageName($event.target.value)"/></td>
 		<td><select [value]="newLanguageSpokenComprehension" (change)="updateLanguageSpokenComprehension($event.target.value)">
-				<option value=0>None</option>
-				<option value=1>Broken</option>
-				<option value=2>Accented</option>
-				<option value=3>Native</option>
-			</select>
-		</td>
+			<option value=0>None</option>
+			<option value=1>Broken</option>
+			<option value=2>Accented</option>
+			<option value=3>Native</option>
+		</select></td>
 		<td><select [value]="effectiveNewLanguageWrittenComprehension" (change)="updateLanguageWrittenComprehension($event.target.value)">
-				<option value=0>None</option>
-				<option value=1>Broken</option>
-				<option value=2>Accented</option>
-				<option value=3>Native</option>
-			</select>
-		</td>
+			<option value=0>None</option>
+			<option value=1>Broken</option>
+			<option value=2>Accented</option>
+			<option value=3>Native</option>
+		</select></td>
 		<td><span>{{getNewLanguageCost(languages.length === 0)}}</span></td>
 		<td><button (click)="addLanguage()">+</button></td>
+	</tr>
+</table>
+<hr/>
+<h3>WEALTH AND STATUS</h3>
+<table>
+	<tr>
+		<td>WEALTH</td>
+		<td *ngIf="wealth == 8">LEVEL</td>
+		<td>COST</td>
+	</tr>
+	<tr>
+		<td><select [value]="wealth" (input)="wealth = $event.target.value">
+			<option value=0>Dead Broke</option>
+			<option value=1>Poor</option>
+			<option value=2>Struggling</option>
+			<option value=3>Average</option>
+			<option value=4>Comfortable</option>
+			<option value=5>Wealthy</option>
+			<option value=6>Very Wealthy</option>
+			<option value=7>Rich</option>
+			<option value=8>Multimillionaire</option>
+		</select></td>
+		<td *ngIf="wealth == 8">{{multimillionaireLevel}}</td>
+		<td>{{getWealthCost()}}</td>
+	</tr>
+	<tr *ngIf="wealth == 8">
+		<td></td>
+		<td><button (click)="increaseMultimillionaireLevel()">+</button><button (click)="decreaseMultimillionaireLevel()">-</button></td>
+		<td></td>
 	</tr>
 </table>

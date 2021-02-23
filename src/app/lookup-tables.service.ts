@@ -35,7 +35,16 @@ export class LookupTablesService {
     language0: 0,
     language1: 2,
     language2: 4,
-    language3: 6
+    language3: 6,
+    wealth0: -25,
+    wealth1: -15,
+    wealth2: -10,
+    wealth3: 0,
+    wealth4: 10,
+    wealth5: 20,
+    wealth6: 30,
+    wealth7: 50,
+    wealth8: 25, //Multimillionaire is 25 points per level
   };
 
   private INCREMENT_TABLE = {
