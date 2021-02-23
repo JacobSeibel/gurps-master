@@ -32,7 +32,7 @@ export class CharacterSheetComponent implements OnInit {
 
   languages: Language[] = [];
   newLanguageName = '';
-  newLanguageComprehension;
+  newLanguageComprehension = 2;
 
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
@@ -85,16 +85,24 @@ export class CharacterSheetComponent implements OnInit {
     return Math.round(total - (total * discount));
   }
 
+  languagePointTotal() {
+    if ( this.languages.length <= 1 ) {
+      return 0;
+    }
+    let total = 0;
+    for (const language of this.languages) {
+      total += this.lookupTables.cost('language' + language.comprehension);
+    }
+    return total - this.lookupTables.cost('language2'); //Reduce cost by the value of the free native language.
+  }
+
+  getLanguageCost(language: Language) {
+    return this.lookupTables.cost('language' + language.comprehension);
+  }
+
   updateLanguageName(name: string, language?: Language) {
     if (!language) {
       this.newLanguageName = name;
-      if (this.newLanguageComprehension) {
-        const newLanguage = new Language(this.newLanguageName, this.newLanguageComprehension);
-        this.languages.push(newLanguage);
-        this.newLanguageName = '';
-        this.newLanguageComprehension = null;
-        console.log("New language!");
-      }
     } else {
       language.name = name;
     }
@@ -103,16 +111,22 @@ export class CharacterSheetComponent implements OnInit {
   updateLanguageComprehension(comprehension: number, language?: Language) {
     if (!language) {
       this.newLanguageComprehension = comprehension;
-      if (this.newLanguageName !== '') {
-        const newLanguage = new Language(this.newLanguageName, this.newLanguageComprehension);
-        this.languages.push(newLanguage);
-        console.log("New language!  " + this.newLanguageName + " " + this.newLanguageComprehension);
-        this.newLanguageName = '';
-        this.newLanguageComprehension = null;
-      }
     } else {
       language.comprehension = comprehension;
     }
+  }
+
+  addLanguage() {
+    if (this.newLanguageName !== '' && this.newLanguageComprehension != -1) {
+      const newLanguage = new Language(this.newLanguageName, this.newLanguageComprehension);
+      this.newLanguageName = '';
+      this.newLanguageComprehension = -1;
+      this.languages.push(newLanguage);
+    }
+  }
+
+  removeLanguage(language: Language) {
+    this.languages.splice(this.languages.indexOf(language), 1);
   }
 
   get pointTotal() {
@@ -124,6 +138,7 @@ export class CharacterSheetComponent implements OnInit {
     });
     pointTotal += this.lookupTables.cost('build' + this.build);
     pointTotal += this.appearancePointTotal();
+    pointTotal += this.languagePointTotal();
     return pointTotal;
   }
 

@@ -31,7 +31,10 @@ export class LookupTablesService {
     appearance7: 8,
     appearance8: 16,
     appearance9: 20,
-    personalTechLevel: 5
+    personalTechLevel: 5,
+    language0: 2,
+    language1: 4,
+    language2: 6
   };
 
   private INCREMENT_TABLE = {
@@ -87,7 +90,7 @@ export class LookupTablesService {
   };
   constructor() {}
 
-  cost(stat: string) {
+  cost(stat: string): number {
     return this.COST_TABLE[stat];
   }
 

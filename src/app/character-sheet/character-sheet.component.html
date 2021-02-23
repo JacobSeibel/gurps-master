@@ -213,21 +213,29 @@
 		<td>COMPREHENSION</td>
 		<td>COST</td>
 	</tr>
-	<tr *ngFor="let language of languages">
+	<tr *ngFor="let language of languages; let i = index">
 		<td><input [value]="language.name" (change)="updateLanguageName($event.target, language)"/></td>
-		<td><select [value]="language.comprehension" (change)="updateLanguageComprehension($event.target, language)">
-			<option value=0>Broken</option>
-			<option value=1>Accented</option>
-			<option value=2>Native</option>
-		</select></td>
+		<td><select *ngIf="i > 0" [value]="language.comprehension" (change)="updateLanguageComprehension($event.target, language)">
+				<option value=0>Broken</option>
+				<option value=1>Accented</option>
+				<option value=2>Native</option>
+			</select>
+			<span *ngIf="i === 0">Native</span>
+		</td>
+		<td><span *ngIf="i > 0">{{getLanguageCost(language)}}</span></td>
+		<td><button (click)="removeLanguage(language)">-</button></td>
 	</tr>
 	<tr>
 		<td><input [value]="newLanguageName" (change)="updateLanguageName($event.target.value)"/></td>
-		<td><select [value]="newLanguageComprehension" (change)="updateLanguageComprehension($event.target.value)">
-			<option></option>
-			<option value=0>Broken</option>
-			<option value=1>Accented</option>
-			<option value=2>Native</option>
-		</select></td>
+		<td><select *ngIf="languages.length > 0" [value]="newLanguageComprehension" (change)="updateLanguageComprehension($event.target.value)">
+				<option value=-1></option>
+				<option value=0>Broken</option>
+				<option value=1>Accented</option>
+				<option value=2>Native</option>
+			</select>
+			<span *ngIf="languages.length === 0">Native</span>
+		</td>
+		<td></td>
+		<td><button (click)="addLanguage()">+</button></td>
 	</tr>
 </table>
