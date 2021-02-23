@@ -86,7 +86,7 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   languagePointTotal() {
-    if ( this.languages.length <= 1 ) {
+    if ( this.languages.length === 0 ) {
       return 0;
     }
     let total = 0;
@@ -96,8 +96,9 @@ export class CharacterSheetComponent implements OnInit {
     return total - this.lookupTables.cost('language2'); //Reduce cost by the value of the free native language.
   }
 
-  getLanguageCost(language: Language) {
-    return this.lookupTables.cost('language' + language.comprehension);
+  getLanguageCost(language: Language, native?: boolean) {
+    const nativeDiscount = native ? this.lookupTables.cost('language2') : 0;
+    return this.lookupTables.cost('language' + language.comprehension) - nativeDiscount;
   }
 
   updateLanguageName(name: string, language?: Language) {
@@ -108,7 +109,7 @@ export class CharacterSheetComponent implements OnInit {
     }
   }
 
-  updateLanguageComprehension(comprehension: number, language?: Language) {
+  updateLanguageComprehension(comprehension: any, language?: Language) {
     if (!language) {
       this.newLanguageComprehension = comprehension;
     } else {
