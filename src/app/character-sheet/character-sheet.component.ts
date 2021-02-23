@@ -32,7 +32,8 @@ export class CharacterSheetComponent implements OnInit {
 
   languages: Language[] = [];
   newLanguageName = '';
-  newLanguageComprehension = 2;
+  newLanguageSpokenComprehension = 3;
+  newLanguageWrittenComprehension;
 
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
@@ -91,14 +92,20 @@ export class CharacterSheetComponent implements OnInit {
     }
     let total = 0;
     for (const language of this.languages) {
-      total += this.lookupTables.cost('language' + language.comprehension);
+      total += this.lookupTables.cost('language' + language.spokenComprehension);
     }
-    return total - this.lookupTables.cost('language2'); //Reduce cost by the value of the free native language.
+    return total - this.lookupTables.cost('language3'); //Reduce cost by the value of the free native language.
   }
 
   getLanguageCost(language: Language, native?: boolean) {
-    const nativeDiscount = native ? this.lookupTables.cost('language2') : 0;
-    return this.lookupTables.cost('language' + language.comprehension) - nativeDiscount;
+    const nativeDiscount = native ? this.lookupTables.cost('language3') : 0;
+    const spokenCost = this.lookupTables.cost('language' + language.spokenComprehension)/2;
+    const writtenCost = this.lookupTables.cost('language' + language.writtenComprehension)/2;
+    return spokenCost + writtenCost - nativeDiscount;
+  }
+
+  getNewLanguageCost(native: boolean) {
+    return this.getLanguageCost(new Language(this.newLanguageName, this.newLanguageSpokenComprehension, this.effectiveNewLanguageWrittenComprehension), native);
   }
 
   updateLanguageName(name: string, language?: Language) {
@@ -109,19 +116,28 @@ export class CharacterSheetComponent implements OnInit {
     }
   }
 
-  updateLanguageComprehension(comprehension: any, language?: Language) {
+  updateLanguageSpokenComprehension(spokenComprehension: number, language?: Language) {
     if (!language) {
-      this.newLanguageComprehension = comprehension;
+      this.newLanguageSpokenComprehension = spokenComprehension;
     } else {
-      language.comprehension = comprehension;
+      language.spokenComprehension = spokenComprehension;
+    }
+  }
+
+  updateLanguageWrittenComprehension(writtenComprehension: number, language?: Language) {
+    if (!language) {
+      this.newLanguageWrittenComprehension = writtenComprehension;
+    } else {
+      language.writtenComprehension = writtenComprehension;
     }
   }
 
   addLanguage() {
-    if (this.newLanguageName !== '' && this.newLanguageComprehension != -1) {
-      const newLanguage = new Language(this.newLanguageName, this.newLanguageComprehension);
+    if (this.newLanguageName !== '' && this.newLanguageSpokenComprehension != -1) {
+      const newLanguage = new Language(this.newLanguageName, this.newLanguageSpokenComprehension, this.effectiveNewLanguageWrittenComprehension);
       this.newLanguageName = '';
-      this.newLanguageComprehension = -1;
+      this.newLanguageSpokenComprehension = 0;
+      this.newLanguageWrittenComprehension = null;
       this.languages.push(newLanguage);
     }
   }
@@ -145,6 +161,10 @@ export class CharacterSheetComponent implements OnInit {
 
   get personalTechLevel() {
     return this.moddedValue(0, 'personalTechLevel');
+  }
+
+  get effectiveNewLanguageWrittenComprehension() {
+    return this.newLanguageWrittenComprehension ? this.newLanguageWrittenComprehension : this.newLanguageSpokenComprehension;
   }
 
   get st() {

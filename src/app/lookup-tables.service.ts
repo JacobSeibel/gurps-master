@@ -32,9 +32,10 @@ export class LookupTablesService {
     appearance8: 16,
     appearance9: 20,
     personalTechLevel: 5,
-    language0: 2,
-    language1: 4,
-    language2: 6
+    language0: 0,
+    language1: 2,
+    language2: 4,
+    language3: 6
   };
 
   private INCREMENT_TABLE = {

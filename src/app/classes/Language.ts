@@ -1,9 +1,11 @@
 export class Language {
   name: string;
-  comprehension: number;
+  spokenComprehension: number;
+  writtenComprehension: number;
 
-  constructor(name: string, comprehension: number) {
+  constructor(name: string, spokenComprehension: number, writtenComprehension?: number) {
     this.name = name;
-    this.comprehension = comprehension;
+    this.spokenComprehension = spokenComprehension;
+    this.writtenComprehension = writtenComprehension ? writtenComprehension : spokenComprehension;
   }
 }

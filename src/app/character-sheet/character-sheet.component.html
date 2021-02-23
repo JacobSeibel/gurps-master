@@ -210,15 +210,24 @@
 <table>
 	<tr>
 		<td>NAME</td>
-		<td>COMPREHENSION</td>
+		<td>SPOKEN COMPREHENSION</td>
+		<td>WRITTEN COMPREHENSION</td>
 		<td>COST</td>
 	</tr>
 	<tr *ngFor="let language of languages; let i = index">
 		<td><input [value]="language.name" (change)="updateLanguageName($event.target.value, language)"/></td>
-		<td><select [value]="language.comprehension" (change)="updateLanguageComprehension($event.target.value, language)">
-				<option value=0>Broken</option>
-				<option value=1>Accented</option>
-				<option value=2>Native</option>
+		<td><select [value]="language.spokenComprehension" (change)="updateLanguageSpokenComprehension($event.target.value, language)">
+				<option value=0>None</option>
+				<option value=1>Broken</option>
+				<option value=2>Accented</option>
+				<option value=3>Native</option>
+			</select>
+		</td>
+		<td><select [value]="language.writtenComprehension" (change)="updateLanguageWrittenComprehension($event.target.value, language)">
+				<option value=0>None</option>
+				<option value=1>Broken</option>
+				<option value=2>Accented</option>
+				<option value=3>Native</option>
 			</select>
 		</td>
 		<td>
@@ -228,14 +237,21 @@
 	</tr>
 	<tr>
 		<td><input [value]="newLanguageName" (change)="updateLanguageName($event.target.value)"/></td>
-		<td><select [value]="newLanguageComprehension" (change)="updateLanguageComprehension($event.target.value)">
-				<option value=-1></option>
-				<option value=0>Broken</option>
-				<option value=1>Accented</option>
-				<option value=2>Native</option>
+		<td><select [value]="newLanguageSpokenComprehension" (change)="updateLanguageSpokenComprehension($event.target.value)">
+				<option value=0>None</option>
+				<option value=1>Broken</option>
+				<option value=2>Accented</option>
+				<option value=3>Native</option>
 			</select>
 		</td>
-		<td></td>
+		<td><select [value]="effectiveNewLanguageWrittenComprehension" (change)="updateLanguageWrittenComprehension($event.target.value)">
+				<option value=0>None</option>
+				<option value=1>Broken</option>
+				<option value=2>Accented</option>
+				<option value=3>Native</option>
+			</select>
+		</td>
+		<td><span>{{getNewLanguageCost(languages.length === 0)}}</span></td>
 		<td><button (click)="addLanguage()">+</button></td>
 	</tr>
 </table>
