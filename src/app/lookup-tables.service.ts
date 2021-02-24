@@ -45,6 +45,11 @@ export class LookupTablesService {
     wealth6: 30,
     wealth7: 50,
     wealth8: 25, //Multimillionaire is 25 points per level
+    repReaction: 5,
+    repScope0: 1,
+    repScope1: .666,
+    repScope2: .5,
+    repScope3: .333,
   };
 
   private INCREMENT_TABLE = {

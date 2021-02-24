@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { LookupTablesService } from '../lookup-tables.service';
 import { ModifierGroup } from '../classes/Modifier';
 import { Language } from '../classes/Language';
+import { Reputation } from '../classes/Reputation';
 
 @Component({
   selector: 'app-character-sheet',
@@ -39,6 +40,14 @@ export class CharacterSheetComponent implements OnInit {
   // WEALTH AND STATUS
   wealth: number = 3;
   multimillionaireLevel: number = 1;
+
+  // REPUTATION
+  reputations: Reputation[] = [];
+  newReputationDescription = '';
+  newReputationReaction = 0;
+  newReputationScope = 0;
+  newReputationGroup = '';
+  newReputationFree = false;
 
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
@@ -160,6 +169,79 @@ export class CharacterSheetComponent implements OnInit {
       this.multimillionaireLevel--;
   }
 
+  increaseReputationReaction(reputation?: Reputation) {
+    let reaction = reputation ? reputation.reaction : this.newReputationReaction;
+    if (reaction < 4) {
+      reaction++;
+      if (reputation) {
+        reputation.reaction = reaction;
+      } else {
+        this.newReputationReaction = reaction;
+      }
+    }
+  }
+
+  decreaseReputationReaction(reputation?: Reputation) {
+    let reaction = reputation ? reputation.reaction : this.newReputationReaction;
+    if (reaction > -4) {
+      reaction--;
+      if (reputation) {
+        reputation.reaction = reaction;
+      } else {
+        this.newReputationReaction = reaction;
+      }
+    }
+  }
+
+  addReputation() {
+    if (this.newReputationDescription !== '' && (this.newReputationScope == 0 || this.newReputationGroup !== '')) {
+      this.reputations.push(
+        new Reputation(
+          this.newReputationDescription,
+          this.newReputationReaction,
+          this.newReputationScope,
+          this.getEffectiveReputationGroup(),
+          this.newReputationFree));
+      this.newReputationDescription = '';
+      this.newReputationReaction = 0;
+      this.newReputationScope = 0;
+      this.newReputationGroup = '';
+      this.newReputationFree = false;
+    }
+  }
+
+  removeReputation(reputation: Reputation) {
+    this.reputations.splice(this.reputations.indexOf(reputation), 1);
+  }
+
+  getReputationCost(reputation?: Reputation) {
+    const free = reputation ? reputation.free : this.newReputationFree;
+
+    if ( free ) 
+      return 0;
+
+    const reaction = reputation ? reputation.reaction : this.newReputationReaction;
+    const scope = reputation ? reputation.scope : this.newReputationScope;
+    
+    let cost = this.lookupTables.cost('repReaction') * reaction;
+    cost = Math.floor(this.lookupTables.cost('repScope' + scope) * cost);
+    return cost;
+  }
+
+  reputationPointTotal() {
+    let total = this.getReputationCost();
+    for (const reputation of this.reputations) {
+      total += this.getReputationCost(reputation);
+    }
+    return total;
+  }
+
+  getEffectiveReputationGroup(reputation?: Reputation) {
+    const group = reputation ? reputation.group : this.newReputationGroup;
+    const scope = reputation ? reputation.scope : this.newReputationScope;
+    return scope != 0 ? group : '';
+  }
+
   getWealthCost() {
     let multimillionaireExtraCost = 0;
     let effectiveWealthLevel = this.wealth;
@@ -181,6 +263,7 @@ export class CharacterSheetComponent implements OnInit {
     pointTotal += this.appearancePointTotal();
     pointTotal += this.languagePointTotal();
     pointTotal += this.getWealthCost();
+    pointTotal += this.reputationPointTotal();
     return pointTotal;
   }
 

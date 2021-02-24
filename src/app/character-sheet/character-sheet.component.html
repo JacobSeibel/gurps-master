@@ -280,3 +280,60 @@
 		<td></td>
 	</tr>
 </table>
+<table>
+	<tr>
+		<td>REPUTATION</td>
+		<td>REACTION</td>
+		<td>SCOPE</td>
+		<td>GROUP</td>
+		<td>FREE?</td>
+		<td>COST</td>
+		<td></td>
+	</tr>
+	<ng-container *ngFor="let reputation of reputations">
+		<tr>
+			<td><input [value]="reputation.description" (input)="reputation.description = $event.target.value"></td>
+			<td>{{reputation.reaction}}</td>
+			<td><select [value]="reputation.scope" (input)="reputation.scope = $event.target.value">
+				<option value=0>Almost everyone</option>
+				<option value=1>Everyone except this large group</option>
+				<option value=2>This large group</option>
+				<option value=3>This small group</option>
+			</select></td>
+			<td><input [value]="getEffectiveReputationGroup(reputation)" (input)="reputation.group = $event.target.value" [disabled]="reputation.scope == 0"></td>
+			<td><input type="checkbox" [checked]="reputation.free" (change)="reputation.free = !reputation.free">
+			<td>{{getReputationCost(reputation)}}</td>
+			<td><button (click)="removeReputation(reputation)">-</button></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><button (click)="increaseReputationReaction(reputation)">+</button><button (click)="decreaseReputationReaction(reputation)">-</button></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</ng-container>
+	<tr>
+		<td><input [value]="newReputationDescription" (input)="newReputationDescription = $event.target.value"></td>
+		<td>{{newReputationReaction}}</td>
+		<td><select [value]="newReputationScope" (input)="newReputationScope = $event.target.value">
+			<option value=0>Almost everyone</option>
+			<option value=1>Everyone except this large group</option>
+			<option value=2>This large group</option>
+			<option value=3>This small group</option>
+		</select></td>
+		<td><input [value]="getEffectiveReputationGroup()" (input)="newReputationGroup = $event.target.value" [disabled]="newReputationScope == 0"></td>
+		<td><input type="checkbox" [checked]="newReputationFree" (change)="newReputationFree = !newReputationFree">
+		<td>{{getReputationCost()}}</td>
+		<td><button (click)="addReputation()">+</button></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><button (click)="increaseReputationReaction()">+</button><button (click)="decreaseReputationReaction()">-</button></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
