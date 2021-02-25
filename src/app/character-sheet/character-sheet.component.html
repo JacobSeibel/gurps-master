@@ -258,6 +258,8 @@
 		<td>WEALTH</td>
 		<td *ngIf="wealth == 8">LEVEL</td>
 		<td>COST</td>
+		<td>STATUS</td>
+		<td>COST</td>
 	</tr>
 	<tr>
 		<td><select [value]="wealth" (input)="wealth = $event.target.value">
@@ -273,10 +275,14 @@
 		</select></td>
 		<td *ngIf="wealth == 8">{{multimillionaireLevel}}</td>
 		<td>{{getWealthCost()}}</td>
+		<td>{{status}}</td>
+		<td>{{getStatusCost()}}</td>
 	</tr>
-	<tr *ngIf="wealth == 8">
+	<tr>
 		<td></td>
-		<td><button (click)="increaseMultimillionaireLevel()">+</button><button (click)="decreaseMultimillionaireLevel()">-</button></td>
+		<td *ngIf="wealth == 8"><button (click)="increaseMultimillionaireLevel()">+</button><button (click)="decreaseMultimillionaireLevel()">-</button></td>
+		<td></td>
+		<td><button (click)="status = status + 1">+</button><button (click)="status = status - 1">-</button></td>
 		<td></td>
 	</tr>
 </table>

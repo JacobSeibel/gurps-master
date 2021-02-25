@@ -40,6 +40,7 @@ export class CharacterSheetComponent implements OnInit {
   // WEALTH AND STATUS
   wealth: number = 3;
   multimillionaireLevel: number = 1;
+  status: number = 0;
 
   // REPUTATION
   reputations: Reputation[] = [];
@@ -256,6 +257,10 @@ export class CharacterSheetComponent implements OnInit {
       effectiveWealthLevel = 7;
     }
     return this.lookupTables.cost('wealth' + effectiveWealthLevel) + multimillionaireExtraCost;
+  }
+
+  getStatusCost() {
+    return this.lookupTables.cost('status') * this.status;
   }
 
   get pointTotal() {
