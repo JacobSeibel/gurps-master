@@ -284,8 +284,9 @@
 	<tr>
 		<td>REPUTATION</td>
 		<td>REACTION</td>
-		<td>SCOPE</td>
+		<td>PEOPLE AFFECTED</td>
 		<td>GROUP</td>
+		<td>FREQUENCY</td>
 		<td>FREE?</td>
 		<td>COST</td>
 		<td></td>
@@ -301,6 +302,11 @@
 				<option value=3>This small group</option>
 			</select></td>
 			<td><input [value]="getEffectiveReputationGroup(reputation)" (input)="reputation.group = $event.target.value" [disabled]="reputation.scope == 0"></td>
+			<td><select [value]="reputation.frequency" (input)="reputation.frequency = $event.target.value">
+				<option value=0>All the time (100%)</option>
+				<option value=1>Sometimes (56%)</option>
+				<option value=2>Occasionally (39%)</option>
+			</select></td>
 			<td><input type="checkbox" [checked]="reputation.free" (change)="reputation.free = !reputation.free">
 			<td>{{getReputationCost(reputation)}}</td>
 			<td><button (click)="removeReputation(reputation)">-</button></td>
@@ -324,6 +330,11 @@
 			<option value=3>This small group</option>
 		</select></td>
 		<td><input [value]="getEffectiveReputationGroup()" (input)="newReputationGroup = $event.target.value" [disabled]="newReputationScope == 0"></td>
+		<td><select [value]="newReputationFrequency" (input)="newReputationFrequency = $event.target.value">
+			<option value=0>All the time (100%)</option>
+			<option value=1>Sometimes (56%)</option>
+			<option value=2>Occasionally (39%)</option>
+		</select></td>
 		<td><input type="checkbox" [checked]="newReputationFree" (change)="newReputationFree = !newReputationFree">
 		<td>{{getReputationCost()}}</td>
 		<td><button (click)="addReputation()">+</button></td>

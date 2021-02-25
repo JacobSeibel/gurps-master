@@ -50,6 +50,9 @@ export class LookupTablesService {
     repScope1: .666,
     repScope2: .5,
     repScope3: .333,
+    repFrequency0: 1,
+    repFrequency1: .5,
+    repFrequency2: .333,
   };
 
   private INCREMENT_TABLE = {

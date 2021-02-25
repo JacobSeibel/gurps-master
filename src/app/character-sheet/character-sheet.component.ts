@@ -47,6 +47,7 @@ export class CharacterSheetComponent implements OnInit {
   newReputationReaction = 0;
   newReputationScope = 0;
   newReputationGroup = '';
+  newReputationFrequency = 0;
   newReputationFree = false;
 
   constructor(private lookupTables: LookupTablesService) {}
@@ -201,11 +202,13 @@ export class CharacterSheetComponent implements OnInit {
           this.newReputationReaction,
           this.newReputationScope,
           this.getEffectiveReputationGroup(),
+          this.newReputationFrequency,
           this.newReputationFree));
       this.newReputationDescription = '';
       this.newReputationReaction = 0;
       this.newReputationScope = 0;
       this.newReputationGroup = '';
+      this.newReputationFrequency = 0;
       this.newReputationFree = false;
     }
   }
@@ -220,11 +223,14 @@ export class CharacterSheetComponent implements OnInit {
     if ( free ) 
       return 0;
 
-    const reaction = reputation ? reputation.reaction : this.newReputationReaction;
+    const reaction = reputation ? reputation.reaction : this.newReputationReaction
     const scope = reputation ? reputation.scope : this.newReputationScope;
+    const frequency = reputation ? reputation.frequency : this.newReputationFrequency;
     
     let cost = this.lookupTables.cost('repReaction') * reaction;
-    cost = Math.floor(this.lookupTables.cost('repScope' + scope) * cost);
+    cost = this.lookupTables.cost('repScope' + scope) * cost;
+    cost = this.lookupTables.cost('repFrequency' + frequency) * cost;
+    cost = Math.floor(cost);
     return cost;
   }
 
