@@ -275,6 +275,27 @@ export class CharacterSheetComponent implements OnInit {
     return this.lookupTables.cost('rank') * effectiveRank;
   }
 
+  addRank() {
+    if (this.newRankOrganization) {
+      this.ranks.push(new Rank(this.newRankOrganization, this.newRank, this.newRankDescription));
+      this.newRankOrganization = '';
+      this.newRank = 0;
+      this.newRankDescription = '';
+    }
+  }
+
+  rankPointTotal() {
+    let total = this.getRankCost();
+    for (const rank of this.ranks) {
+      total += this.getRankCost(rank);
+    }
+    return total;
+  }
+
+  removeRank(rank: Rank) {
+    this.ranks.splice(this.ranks.indexOf(rank), 1);
+  }
+
   get pointTotal() {
     let pointTotal = 0;
     this.deltas.forEach((delta, stat) => {
@@ -287,6 +308,7 @@ export class CharacterSheetComponent implements OnInit {
     pointTotal += this.languagePointTotal();
     pointTotal += this.getWealthCost();
     pointTotal += this.reputationPointTotal();
+    pointTotal += this.rankPointTotal();
     return pointTotal;
   }
 
