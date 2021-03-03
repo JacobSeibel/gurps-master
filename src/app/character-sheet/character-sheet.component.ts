@@ -3,6 +3,7 @@ import { LookupTablesService } from '../lookup-tables.service';
 import { ModifierGroup } from '../classes/Modifier';
 import { Language } from '../classes/Language';
 import { Reputation } from '../classes/Reputation';
+import { Rank } from '../classes/Rank';
 
 @Component({
   selector: 'app-character-sheet',
@@ -51,6 +52,12 @@ export class CharacterSheetComponent implements OnInit {
   newReputationFrequency = 0;
   newReputationFree = false;
 
+  // RANK
+  ranks: Rank[] = [];
+  newRankOrganization = '';
+  newRank = 0;
+  newRankDescription = '';
+
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
 
@@ -96,7 +103,7 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   appearancePointTotal() {
-    const total = this.lookupTables.cost('appearance' + this.appearance);
+    const total = this.lookupTables.cost('appearance', this.appearance);
     let discount = this.universal ? -.25 : 0;
     discount += this.offTheShelfLooks ? .5 : 0;
     return Math.round(total - (total * discount));
@@ -108,15 +115,15 @@ export class CharacterSheetComponent implements OnInit {
     }
     let total = 0;
     for (const language of this.languages) {
-      total += this.lookupTables.cost('language' + language.spokenComprehension);
+      total += this.lookupTables.cost('language', language.spokenComprehension);
     }
-    return total - this.lookupTables.cost('language3'); //Reduce cost by the value of the free native language.
+    return total - this.lookupTables.cost('language', 3); //Reduce cost by the value of the free native language.
   }
 
   getLanguageCost(language: Language, native?: boolean) {
-    const nativeDiscount = native ? this.lookupTables.cost('language3') : 0;
-    const spokenCost = this.lookupTables.cost('language' + language.spokenComprehension)/2;
-    const writtenCost = this.lookupTables.cost('language' + language.writtenComprehension)/2;
+    const nativeDiscount = native ? this.lookupTables.cost('language', 3) : 0;
+    const spokenCost = this.lookupTables.cost('language', language.spokenComprehension)/2;
+    const writtenCost = this.lookupTables.cost('language', language.writtenComprehension)/2;
     return spokenCost + writtenCost - nativeDiscount;
   }
 
@@ -229,8 +236,8 @@ export class CharacterSheetComponent implements OnInit {
     const frequency = reputation ? reputation.frequency : this.newReputationFrequency;
     
     let cost = this.lookupTables.cost('repReaction') * reaction;
-    cost = this.lookupTables.cost('repScope' + scope) * cost;
-    cost = this.lookupTables.cost('repFrequency' + frequency) * cost;
+    cost = this.lookupTables.cost('repScope', scope) * cost;
+    cost = this.lookupTables.cost('repFrequency', frequency) * cost;
     cost = Math.floor(cost);
     return cost;
   }
@@ -253,14 +260,19 @@ export class CharacterSheetComponent implements OnInit {
     let multimillionaireExtraCost = 0;
     let effectiveWealthLevel = this.wealth;
     if (this.wealth == 8) {
-      multimillionaireExtraCost = this.lookupTables.cost('wealth8') * this.multimillionaireLevel;
+      multimillionaireExtraCost = this.lookupTables.cost('wealth', 8) * this.multimillionaireLevel;
       effectiveWealthLevel = 7;
     }
-    return this.lookupTables.cost('wealth' + effectiveWealthLevel) + multimillionaireExtraCost;
+    return this.lookupTables.cost('wealth', effectiveWealthLevel) + multimillionaireExtraCost;
   }
 
   getStatusCost() {
     return this.lookupTables.cost('status') * this.status;
+  }
+
+  getRankCost(rank?: Rank) {
+    const effectiveRank = rank ? rank.rank : this.newRank;
+    return this.lookupTables.cost('rank') * effectiveRank;
   }
 
   get pointTotal() {
@@ -270,7 +282,7 @@ export class CharacterSheetComponent implements OnInit {
       const discount = this.activeModifiers.getTotalDiscount(stat, this.lookupTables.maxDiscount(stat));
       pointTotal += Math.round(cost - (cost * discount));
     });
-    pointTotal += this.lookupTables.cost('build' + this.build);
+    pointTotal += this.lookupTables.cost('build', this.build);
     pointTotal += this.appearancePointTotal();
     pointTotal += this.languagePointTotal();
     pointTotal += this.getWealthCost();

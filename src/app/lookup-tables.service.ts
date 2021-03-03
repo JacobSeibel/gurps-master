@@ -54,6 +54,8 @@ export class LookupTablesService {
     repFrequency1: .5,
     repFrequency2: .333,
     status: 5,
+    rank: 5,
+    rankWithStatus: 10,
   };
 
   private INCREMENT_TABLE = {
@@ -109,8 +111,21 @@ export class LookupTablesService {
   };
   constructor() {}
 
-  cost(stat: string): number {
-    return this.COST_TABLE[stat];
+  cost(stat: string, id?: number): number {
+    let key = stat;
+    let curId = id;
+    if (curId != undefined) {
+      key = stat + curId;
+      while (!(key in this.COST_TABLE)) {
+        curId--;
+        key = stat + curId;
+        if (curId < 0) {
+          console.error(stat + id + ' could not be found.');
+          return;
+        }
+      }
+    }
+    return this.COST_TABLE[key];
   }
 
   increment(stat: string) {

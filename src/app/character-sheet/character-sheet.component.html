@@ -353,4 +353,36 @@
 		<td></td>
 		<td></td>
 	</tr>
+	<tr>
+		<td>ORGANIZATION</td>
+		<td>RANK</td>
+		<td>DESCRIPTION</td>
+		<td>COST</td>
+	</tr>
+	<ng-container *ngFor="let rank of ranks">
+		<tr>
+			<td><input [value]="rank.organization" (input)="rank.organization = $event.target.value"></td>
+			<td>{{rank.rank}}</td>
+			<td><input [value]="rank.description" (input)="rank.description = $event.target.value"></td>
+			<td>{{getRankCost(rank)}}</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><button (click)="rank.rank = rank.rank + 1">+</button><button (click)="rank.rank = rank.rank - 1">-</button></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</ng-container>
+	<tr>
+		<td><input [value]="newRankOrganization" (input)="newRankOrganization = $event.target.value"></td>
+		<td>{{newRank}}</td>
+		<td><input [value]="newRankDescription" (input)="newRankDescription = $event.target.value"></td>
+		<td>{{getRankCost()}}</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><button (click)="newRank = newRank + 1">+</button><button (click)="newRank = newRank - 1">-</button></td>
+		<td></td>
+		<td></td>
+	</tr>
 </table>
