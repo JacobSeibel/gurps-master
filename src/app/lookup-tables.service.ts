@@ -55,7 +55,7 @@ export class LookupTablesService {
     repFrequency2: .333,
     status: 5,
     rank: 5,
-    rankWithStatus: 10,
+    rankReplacesStatus: 10,
   };
 
   private INCREMENT_TABLE = {
@@ -109,6 +109,14 @@ export class LookupTablesService {
     95: { thr: '10d+2', sw: '12d+2' },
     100: { thr: '11d', sw: '13d' },
   };
+
+  private RANK_STATUS_TABLE = {
+    0: 0,
+    2: 1,
+    5: 2,
+    8: 3
+  }
+
   constructor() {}
 
   cost(stat: string, id?: number): number {
@@ -159,5 +167,17 @@ export class LookupTablesService {
 
   swingDamage(st: number) {
     return this.damage(st).sw;
+  }
+
+  rankStatus(rank: number) {
+    if (rank < 0) {
+      console.error('rank cannot be less than 0.');
+      return;
+    }
+    let key = rank;
+    while (!(key in this.RANK_STATUS_TABLE)) {
+      key--;
+    }
+    return this.RANK_STATUS_TABLE[key];
   }
 }

@@ -8,4 +8,8 @@ export class Language {
     this.spokenComprehension = spokenComprehension;
     this.writtenComprehension = writtenComprehension ? writtenComprehension : spokenComprehension;
   }
+
+  get effectiveWrittenComprehension() {
+    return this.writtenComprehension ? this.writtenComprehension : this.spokenComprehension;
+  }
 }

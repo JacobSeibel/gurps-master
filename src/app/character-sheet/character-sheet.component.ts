@@ -34,9 +34,7 @@ export class CharacterSheetComponent implements OnInit {
 
   // LANGUAGE
   languages: Language[] = [];
-  newLanguageName = '';
-  newLanguageSpokenComprehension = 3;
-  newLanguageWrittenComprehension;
+  newLanguage = new Language('', 3, undefined);
 
   // WEALTH AND STATUS
   wealth: number = 3;
@@ -45,18 +43,12 @@ export class CharacterSheetComponent implements OnInit {
 
   // REPUTATION
   reputations: Reputation[] = [];
-  newReputationDescription = '';
-  newReputationReaction = 0;
-  newReputationScope = 0;
-  newReputationGroup = '';
-  newReputationFrequency = 0;
-  newReputationFree = false;
+  newReputation = new Reputation('', 0, 0, '', 0, false);
 
   // RANK
   ranks: Rank[] = [];
-  newRankOrganization = '';
-  newRank = 0;
-  newRankDescription = '';
+  newRank = new Rank('', 0, '', false);
+  rankReplacesStatus = false;
 
   constructor(private lookupTables: LookupTablesService) {}
   ngOnInit(): void {}
@@ -110,30 +102,26 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   languagePointTotal() {
-    if ( this.languages.length === 0 ) {
-      return 0;
-    }
     let total = 0;
+    let freeNative = true;
     for (const language of this.languages) {
-      total += this.lookupTables.cost('language', language.spokenComprehension);
+      total += this.getLanguageCost(language, freeNative);
+      freeNative = false;
     }
-    return total - this.lookupTables.cost('language', 3); //Reduce cost by the value of the free native language.
+    total += this.getLanguageCost(this.newLanguage, freeNative);
+    return total;
   }
 
-  getLanguageCost(language: Language, native?: boolean) {
-    const nativeDiscount = native ? this.lookupTables.cost('language', 3) : 0;
+  getLanguageCost(language: Language, freeNative?: boolean) {
+    const nativeDiscount = freeNative ? this.lookupTables.cost('language', 3) : 0;
     const spokenCost = this.lookupTables.cost('language', language.spokenComprehension)/2;
-    const writtenCost = this.lookupTables.cost('language', language.writtenComprehension)/2;
+    const writtenCost = this.lookupTables.cost('language', language.effectiveWrittenComprehension)/2;
     return spokenCost + writtenCost - nativeDiscount;
-  }
-
-  getNewLanguageCost(native: boolean) {
-    return this.getLanguageCost(new Language(this.newLanguageName, this.newLanguageSpokenComprehension, this.effectiveNewLanguageWrittenComprehension), native);
   }
 
   updateLanguageName(name: string, language?: Language) {
     if (!language) {
-      this.newLanguageName = name;
+      this.newLanguage.name = name;
     } else {
       language.name = name;
     }
@@ -141,7 +129,7 @@ export class CharacterSheetComponent implements OnInit {
 
   updateLanguageSpokenComprehension(spokenComprehension: number, language?: Language) {
     if (!language) {
-      this.newLanguageSpokenComprehension = spokenComprehension;
+      this.newLanguage.spokenComprehension = spokenComprehension;
     } else {
       language.spokenComprehension = spokenComprehension;
     }
@@ -149,19 +137,16 @@ export class CharacterSheetComponent implements OnInit {
 
   updateLanguageWrittenComprehension(writtenComprehension: number, language?: Language) {
     if (!language) {
-      this.newLanguageWrittenComprehension = writtenComprehension;
+      this.newLanguage.writtenComprehension = writtenComprehension;
     } else {
       language.writtenComprehension = writtenComprehension;
     }
   }
 
   addLanguage() {
-    if (this.newLanguageName !== '' && this.newLanguageSpokenComprehension != -1) {
-      const newLanguage = new Language(this.newLanguageName, this.newLanguageSpokenComprehension, this.effectiveNewLanguageWrittenComprehension);
-      this.newLanguageName = '';
-      this.newLanguageSpokenComprehension = 0;
-      this.newLanguageWrittenComprehension = null;
-      this.languages.push(newLanguage);
+    if (this.newLanguage.name !== '' && (this.newLanguage.spokenComprehension != 0 || this.newLanguage.effectiveWrittenComprehension != 0)) {
+      this.languages.push(this.newLanguage);
+      this.newLanguage = new Language('', 0, null);
     }
   }
 
@@ -179,45 +164,33 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   increaseReputationReaction(reputation?: Reputation) {
-    let reaction = reputation ? reputation.reaction : this.newReputationReaction;
+    let reaction = reputation ? reputation.reaction : this.newReputation.reaction;
     if (reaction < 4) {
       reaction++;
       if (reputation) {
         reputation.reaction = reaction;
       } else {
-        this.newReputationReaction = reaction;
+        this.newReputation.reaction = reaction;
       }
     }
   }
 
   decreaseReputationReaction(reputation?: Reputation) {
-    let reaction = reputation ? reputation.reaction : this.newReputationReaction;
+    let reaction = reputation ? reputation.reaction : this.newReputation.reaction;
     if (reaction > -4) {
       reaction--;
       if (reputation) {
         reputation.reaction = reaction;
       } else {
-        this.newReputationReaction = reaction;
+        this.newReputation.reaction = reaction;
       }
     }
   }
 
   addReputation() {
-    if (this.newReputationDescription !== '' && (this.newReputationScope == 0 || this.newReputationGroup !== '')) {
-      this.reputations.push(
-        new Reputation(
-          this.newReputationDescription,
-          this.newReputationReaction,
-          this.newReputationScope,
-          this.getEffectiveReputationGroup(),
-          this.newReputationFrequency,
-          this.newReputationFree));
-      this.newReputationDescription = '';
-      this.newReputationReaction = 0;
-      this.newReputationScope = 0;
-      this.newReputationGroup = '';
-      this.newReputationFrequency = 0;
-      this.newReputationFree = false;
+    if (this.newReputation.description !== '' && (this.newReputation.scope == 0 || this.newReputation.group !== '')) {
+      this.reputations.push(this.newReputation);
+      this.newReputation = new Reputation('', 0, 0, '', 0, false);
     }
   }
 
@@ -225,35 +198,23 @@ export class CharacterSheetComponent implements OnInit {
     this.reputations.splice(this.reputations.indexOf(reputation), 1);
   }
 
-  getReputationCost(reputation?: Reputation) {
-    const free = reputation ? reputation.free : this.newReputationFree;
-
-    if ( free ) 
+  getReputationCost(reputation: Reputation) {
+    if ( reputation.free ) 
       return 0;
 
-    const reaction = reputation ? reputation.reaction : this.newReputationReaction
-    const scope = reputation ? reputation.scope : this.newReputationScope;
-    const frequency = reputation ? reputation.frequency : this.newReputationFrequency;
-    
-    let cost = this.lookupTables.cost('repReaction') * reaction;
-    cost = this.lookupTables.cost('repScope', scope) * cost;
-    cost = this.lookupTables.cost('repFrequency', frequency) * cost;
+    let cost = this.lookupTables.cost('repReaction') * reputation.reaction;
+    cost = this.lookupTables.cost('repScope', reputation.scope) * cost;
+    cost = this.lookupTables.cost('repFrequency', reputation.frequency) * cost;
     cost = Math.floor(cost);
     return cost;
   }
 
   reputationPointTotal() {
-    let total = this.getReputationCost();
+    let total = this.getReputationCost(this.newReputation);
     for (const reputation of this.reputations) {
       total += this.getReputationCost(reputation);
     }
     return total;
-  }
-
-  getEffectiveReputationGroup(reputation?: Reputation) {
-    const group = reputation ? reputation.group : this.newReputationGroup;
-    const scope = reputation ? reputation.scope : this.newReputationScope;
-    return scope != 0 ? group : '';
   }
 
   getWealthCost() {
@@ -267,25 +228,23 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   getStatusCost() {
-    return this.lookupTables.cost('status') * this.status;
+    return this.rankReplacesStatus ? 0 : this.lookupTables.cost('status') * this.status;
   }
 
-  getRankCost(rank?: Rank) {
-    const effectiveRank = rank ? rank.rank : this.newRank;
-    return this.lookupTables.cost('rank') * effectiveRank;
+  getRankCost(rank: Rank) {
+    const key = rank.replacesStatus ? 'rankReplacesStatus' : 'rank';
+    return this.lookupTables.cost(key) * rank.rank;
   }
 
   addRank() {
-    if (this.newRankOrganization) {
-      this.ranks.push(new Rank(this.newRankOrganization, this.newRank, this.newRankDescription));
-      this.newRankOrganization = '';
-      this.newRank = 0;
-      this.newRankDescription = '';
+    if (this.newRank.organization) {
+      this.ranks.push(this.newRank);
+      this.newRank = new Rank('', 0, '', false);
     }
   }
 
   rankPointTotal() {
-    let total = this.getRankCost();
+    let total = this.getRankCost(this.newRank);
     for (const rank of this.ranks) {
       total += this.getRankCost(rank);
     }
@@ -294,6 +253,17 @@ export class CharacterSheetComponent implements OnInit {
 
   removeRank(rank: Rank) {
     this.ranks.splice(this.ranks.indexOf(rank), 1);
+  }
+
+  getStatusFromRank() {
+    let statusMod = 0;
+    for (const rank of this.ranks) {
+      if (rank.replacesStatus) {
+        return {statusMod: rank.rank, replacesStatus: true};
+      }
+      statusMod += this.lookupTables.rankStatus(rank.rank);
+    }
+    return {statusMod, replacesStatus: false};
   }
 
   get pointTotal() {
@@ -314,10 +284,6 @@ export class CharacterSheetComponent implements OnInit {
 
   get personalTechLevel() {
     return this.moddedValue(0, 'personalTechLevel');
-  }
-
-  get effectiveNewLanguageWrittenComprehension() {
-    return this.newLanguageWrittenComprehension ? this.newLanguageWrittenComprehension : this.newLanguageSpokenComprehension;
   }
 
   get st() {
@@ -427,5 +393,16 @@ export class CharacterSheetComponent implements OnInit {
 
   get unspentPoints() {
     return this.STARTING_POINTS - this.pointTotal;
+  }
+
+  get effectiveStatus() {
+    const statusFromRank = this.getStatusFromRank();
+    if(statusFromRank.replacesStatus) {
+      this.rankReplacesStatus = true;
+      return statusFromRank.statusMod;
+    } else {
+      this.rankReplacesStatus = false;
+    }
+    return this.status + statusFromRank.statusMod;
   }
 }

@@ -14,4 +14,8 @@ export class Reputation {
       this.frequency = frequency;
       this.free = free;
     }
+
+    get effectiveGroup() {
+      return this.scope != 0 ? this.group : '';
+    }
   }

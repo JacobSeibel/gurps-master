@@ -222,7 +222,7 @@
 			<option value=2>Accented</option>
 			<option value=3>Native</option>
 		</select></td>
-		<td><select [value]="language.writtenComprehension" (change)="updateLanguageWrittenComprehension($event.target.value, language)">
+		<td><select [value]="language.effectiveWrittenComprehension" (change)="updateLanguageWrittenComprehension($event.target.value, language)">
 			<option value=0>None</option>
 			<option value=1>Broken</option>
 			<option value=2>Accented</option>
@@ -234,20 +234,20 @@
 		<td><button (click)="removeLanguage(language)">-</button></td>
 	</tr>
 	<tr>
-		<td><input [value]="newLanguageName" (change)="updateLanguageName($event.target.value)"/></td>
-		<td><select [value]="newLanguageSpokenComprehension" (change)="updateLanguageSpokenComprehension($event.target.value)">
+		<td><input [value]="newLanguage.name" (change)="updateLanguageName($event.target.value)"/></td>
+		<td><select [value]="newLanguage.spokenComprehension" (change)="updateLanguageSpokenComprehension($event.target.value)">
 			<option value=0>None</option>
 			<option value=1>Broken</option>
 			<option value=2>Accented</option>
 			<option value=3>Native</option>
 		</select></td>
-		<td><select [value]="effectiveNewLanguageWrittenComprehension" (change)="updateLanguageWrittenComprehension($event.target.value)">
+		<td><select [value]="newLanguage.effectiveWrittenComprehension" (change)="updateLanguageWrittenComprehension($event.target.value)">
 			<option value=0>None</option>
 			<option value=1>Broken</option>
 			<option value=2>Accented</option>
 			<option value=3>Native</option>
 		</select></td>
-		<td><span>{{getNewLanguageCost(languages.length === 0)}}</span></td>
+		<td><span>{{getLanguageCost(newLanguage, languages.length === 0)}}</span></td>
 		<td><button (click)="addLanguage()">+</button></td>
 	</tr>
 </table>
@@ -275,7 +275,7 @@
 		</select></td>
 		<td *ngIf="wealth == 8">{{multimillionaireLevel}}</td>
 		<td>{{getWealthCost()}}</td>
-		<td>{{status}}</td>
+		<td>{{effectiveStatus}}</td>
 		<td>{{getStatusCost()}}</td>
 	</tr>
 	<tr>
@@ -307,7 +307,7 @@
 				<option value=2>This large group</option>
 				<option value=3>This small group</option>
 			</select></td>
-			<td><input [value]="getEffectiveReputationGroup(reputation)" (input)="reputation.group = $event.target.value" [disabled]="reputation.scope == 0"></td>
+			<td><input [value]="reputation.effectiveGroup" (input)="reputation.group = $event.target.value" [disabled]="reputation.scope == 0"></td>
 			<td><select [value]="reputation.frequency" (input)="reputation.frequency = $event.target.value">
 				<option value=0>All the time (100%)</option>
 				<option value=1>Sometimes (56%)</option>
@@ -327,22 +327,22 @@
 		</tr>
 	</ng-container>
 	<tr>
-		<td><input [value]="newReputationDescription" (input)="newReputationDescription = $event.target.value"></td>
-		<td>{{newReputationReaction}}</td>
-		<td><select [value]="newReputationScope" (input)="newReputationScope = $event.target.value">
+		<td><input [value]="newReputation.description" (input)="newReputation.description = $event.target.value"></td>
+		<td>{{newReputation.reaction}}</td>
+		<td><select [value]="newReputation.scope" (input)="newReputation.scope = $event.target.value">
 			<option value=0>Almost everyone</option>
 			<option value=1>Everyone except this large group</option>
 			<option value=2>This large group</option>
 			<option value=3>This small group</option>
 		</select></td>
-		<td><input [value]="getEffectiveReputationGroup()" (input)="newReputationGroup = $event.target.value" [disabled]="newReputationScope == 0"></td>
-		<td><select [value]="newReputationFrequency" (input)="newReputationFrequency = $event.target.value">
+		<td><input [value]="newReputation.effectiveGroup" (input)="newReputation.group = $event.target.value" [disabled]="newReputation.scope == 0"></td>
+		<td><select [value]="newReputation.frequency" (input)="newReputation.frequency = $event.target.value">
 			<option value=0>All the time (100%)</option>
 			<option value=1>Sometimes (56%)</option>
 			<option value=2>Occasionally (39%)</option>
 		</select></td>
-		<td><input type="checkbox" [checked]="newReputationFree" (change)="newReputationFree = !newReputationFree">
-		<td>{{getReputationCost()}}</td>
+		<td><input type="checkbox" [checked]="newReputation.free" (change)="newReputation.free = !newReputation.free">
+		<td>{{getReputationCost(newReputation)}}</td>
 		<td><button (click)="addReputation()">+</button></td>
 	</tr>
 	<tr>
@@ -357,13 +357,16 @@
 		<td>ORGANIZATION</td>
 		<td>RANK</td>
 		<td>DESCRIPTION</td>
+		<td>REPLACES STATUS</td>
 		<td>COST</td>
+		<td></td>
 	</tr>
 	<ng-container *ngFor="let rank of ranks">
 		<tr>
 			<td><input [value]="rank.organization" (input)="rank.organization = $event.target.value"></td>
 			<td>{{rank.rank}}</td>
 			<td><input [value]="rank.description" (input)="rank.description = $event.target.value"></td>
+			<td><input type="checkbox" [checked]="rank.replacesStatus" (change)="rank.replacesStatus = !rank.replacesStatus" [disabled]="rankReplacesStatus && !rank.replacesStatus"></td>
 			<td>{{getRankCost(rank)}}</td>
 			<td><button (click)="removeRank(rank)">-</button></td>
 		</tr>
@@ -373,18 +376,20 @@
 			<td></td>
 			<td></td>
 			<td></td>
+			<td></td>
 		</tr>
 	</ng-container>
 	<tr>
-		<td><input [value]="newRankOrganization" (input)="newRankOrganization = $event.target.value"></td>
-		<td>{{newRank}}</td>
-		<td><input [value]="newRankDescription" (input)="newRankDescription = $event.target.value"></td>
-		<td>{{getRankCost()}}</td>
+		<td><input [value]="newRank.organization" (input)="newRank.organization = $event.target.value"></td>
+		<td>{{newRank.rank}}</td>
+		<td><input [value]="newRank.description" (input)="newRank.description = $event.target.value"></td>
+		<td><input type="checkbox" [checked]="newRank.replacesStatus" (change)="newRank.replacesStatus = !newRank.replacesStatus" [disabled]="rankReplacesStatus"></td>
+		<td>{{getRankCost(newRank)}}</td>
 		<td><button (click)="addRank()">+</button></td>
 	</tr>
 	<tr>
 		<td></td>
-		<td><button (click)="newRank = newRank + 1">+</button><button (click)="newRank = newRank - 1">-</button></td>
+		<td><button (click)="newRank.rank = newRank.rank + 1">+</button><button (click)="newRank.rank = newRank.rank - 1">-</button></td>
 		<td></td>
 		<td></td>
 		<td></td>
