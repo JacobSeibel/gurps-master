@@ -1,4 +1,6 @@
 export class Rank {
+    static BLANK = new Rank('', 0, '', false);
+
     organization: string;
     rank: number;
     description: string;

@@ -132,6 +132,8 @@ export class LookupTablesService {
           return;
         }
       }
+    } else if (this.COST_TABLE[key] == undefined) {
+      return 0;
     }
     return this.COST_TABLE[key];
   }

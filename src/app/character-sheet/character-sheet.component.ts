@@ -4,6 +4,9 @@ import { ModifierGroup } from '../classes/Modifier';
 import { Language } from '../classes/Language';
 import { Reputation } from '../classes/Reputation';
 import { Rank } from '../classes/Rank';
+import { Character } from '../classes/Character';
+import { DeltaGroup } from '../classes/DeltaGroup';
+import { DeltaType } from '../enums/DeltaType';
 
 @Component({
   selector: 'app-character-sheet',
@@ -14,101 +17,66 @@ export class CharacterSheetComponent implements OnInit {
   // TODO: Allow configuration
   STARTING_POINTS = 125;
 
-  deltas = new Map();
+  deltas: DeltaGroup;
   activeModifiers: ModifierGroup = new ModifierGroup();
+  character: Character;
 
-  // DESCRIPTORS
-  name = '';
-  player = '';
-  height = '';
-  weight = '';
-  appearanceDescription = '';
-  appearance = 5;
-  build = 1;
-
-  // APPEARANCE CHECKBOXES
-  androgynous = false;
-  impressive = false;
-  universal = false;
-  offTheShelfLooks = false;
-
-  // LANGUAGE
-  languages: Language[] = [];
   newLanguage = new Language('', 3, undefined);
-
-  // WEALTH AND STATUS
-  wealth: number = 3;
-  multimillionaireLevel: number = 1;
-  status: number = 0;
-
-  // REPUTATION
-  reputations: Reputation[] = [];
   newReputation = new Reputation('', 0, 0, '', 0, false);
-
-  // RANK
-  ranks: Rank[] = [];
   newRank = new Rank('', 0, '', false);
-  rankReplacesStatus = false;
 
-  constructor(private lookupTables: LookupTablesService) {}
+  constructor(private lookupTables: LookupTablesService) {
+    this.character = new Character(lookupTables, this.STARTING_POINTS);
+    this.deltas = new DeltaGroup(this.character, lookupTables);
+  }
   ngOnInit(): void {}
 
-  increaseStat(stat: string) {
-    if (!(this.deltas.has(stat))) {
-      this.deltas.set(stat, 0);
-    }
-    this.deltas.set(stat, this.deltas.get(stat) + this.lookupTables.increment(stat));
-
-    // Special Case: Size modifier adds discount for ST and HP costs
-    if (stat === 'size') {
-      this.setSizeModifierDiscount();
-    }
+  increaseSize() {
+    this.deltas.increaseValue('size');
+    this.setSizeModifierDiscount();
   }
-  decreaseStat(stat: string, minValue?: number) {
-    if (minValue && this[stat] === minValue) {
-      return;
-    }
-    if (!(this.deltas.has(stat))) {
-      this.deltas.set(stat, 0);
-    }
-    this.deltas.set(stat, this.deltas.get(stat) - this.lookupTables.increment(stat));
 
-    // Special Case: Size modifier subtracts discount for ST and HP costs
-    if (stat === 'size') {
-      this.setSizeModifierDiscount();
-    }
+  decreaseSize() {
+    this.deltas.decreaseValue('size');
+    this.setSizeModifierDiscount();
   }
 
   setSizeModifierDiscount() {
-    const sizeModifier = this.deltas.get('size');
+    const sizeModifier = this.deltas.moddedValue('size');
     const effectiveSizeModifier = sizeModifier > 8 ? 8 : sizeModifier;
     const sizeModifierDiscount = effectiveSizeModifier * 0.1;
     this.activeModifiers.setModifier('st', 0, 0, sizeModifierDiscount, 'size');
     this.activeModifiers.setModifier('hp', 0, 0, sizeModifierDiscount, 'size');
   }
 
-  moddedValue(basicValue: number, stat: string) {
-    if (this.deltas.has(stat)) {
-      return basicValue + this.deltas.get(stat);
+  changeAppearanceValue(attribute: string, newValue: number | boolean) {
+    if (typeof(newValue) === 'number') {
+      this.deltas.changeEnum(attribute, newValue);
+    } else {
+      this.deltas.changeBoolean(attribute, newValue);
     }
-    return basicValue;
+    const appearanceDelta = this.deltas.getOrCreate('appearance', DeltaType.Enum);
+    if (!appearanceDelta.customCostFunction) {
+      appearanceDelta.customCostFunction = 
+        () => {
+          const total = this.lookupTables.cost('appearance', this.deltas.moddedValue('appearance'));
+          let discount = this.deltas.moddedValue('universal') ? -.25 : 0;
+          discount += this.deltas.moddedValue('offTheShelfLooks') ? .5 : 0;
+          return Math.round(total - (total * discount));
+        }
+    }
   }
 
-  appearancePointTotal() {
-    const total = this.lookupTables.cost('appearance', this.appearance);
-    let discount = this.universal ? -.25 : 0;
-    discount += this.offTheShelfLooks ? .5 : 0;
-    return Math.round(total - (total * discount));
-  }
-
-  languagePointTotal() {
+  languagePointTotal(newLanguage?: Language) {
     let total = 0;
     let freeNative = true;
-    for (const language of this.languages) {
+    for (const language of this.character.languages) {
       total += this.getLanguageCost(language, freeNative);
       freeNative = false;
     }
-    total += this.getLanguageCost(this.newLanguage, freeNative);
+    if (newLanguage) {
+        total += this.getLanguageCost(newLanguage, freeNative);
+    }
     return total;
   }
 
@@ -117,85 +85,6 @@ export class CharacterSheetComponent implements OnInit {
     const spokenCost = this.lookupTables.cost('language', language.spokenComprehension)/2;
     const writtenCost = this.lookupTables.cost('language', language.effectiveWrittenComprehension)/2;
     return spokenCost + writtenCost - nativeDiscount;
-  }
-
-  updateLanguageName(name: string, language?: Language) {
-    if (!language) {
-      this.newLanguage.name = name;
-    } else {
-      language.name = name;
-    }
-  }
-
-  updateLanguageSpokenComprehension(spokenComprehension: number, language?: Language) {
-    if (!language) {
-      this.newLanguage.spokenComprehension = spokenComprehension;
-    } else {
-      language.spokenComprehension = spokenComprehension;
-    }
-  }
-
-  updateLanguageWrittenComprehension(writtenComprehension: number, language?: Language) {
-    if (!language) {
-      this.newLanguage.writtenComprehension = writtenComprehension;
-    } else {
-      language.writtenComprehension = writtenComprehension;
-    }
-  }
-
-  addLanguage() {
-    if (this.newLanguage.name !== '' && (this.newLanguage.spokenComprehension != 0 || this.newLanguage.effectiveWrittenComprehension != 0)) {
-      this.languages.push(this.newLanguage);
-      this.newLanguage = new Language('', 0, null);
-    }
-  }
-
-  removeLanguage(language: Language) {
-    this.languages.splice(this.languages.indexOf(language), 1);
-  }
-
-  increaseMultimillionaireLevel() {
-    this.multimillionaireLevel++;
-  }
-
-  decreaseMultimillionaireLevel() {
-    if(this.multimillionaireLevel > 1)
-      this.multimillionaireLevel--;
-  }
-
-  increaseReputationReaction(reputation?: Reputation) {
-    let reaction = reputation ? reputation.reaction : this.newReputation.reaction;
-    if (reaction < 4) {
-      reaction++;
-      if (reputation) {
-        reputation.reaction = reaction;
-      } else {
-        this.newReputation.reaction = reaction;
-      }
-    }
-  }
-
-  decreaseReputationReaction(reputation?: Reputation) {
-    let reaction = reputation ? reputation.reaction : this.newReputation.reaction;
-    if (reaction > -4) {
-      reaction--;
-      if (reputation) {
-        reputation.reaction = reaction;
-      } else {
-        this.newReputation.reaction = reaction;
-      }
-    }
-  }
-
-  addReputation() {
-    if (this.newReputation.description !== '' && (this.newReputation.scope == 0 || this.newReputation.group !== '')) {
-      this.reputations.push(this.newReputation);
-      this.newReputation = new Reputation('', 0, 0, '', 0, false);
-    }
-  }
-
-  removeReputation(reputation: Reputation) {
-    this.reputations.splice(this.reputations.indexOf(reputation), 1);
   }
 
   getReputationCost(reputation: Reputation) {
@@ -209,26 +98,16 @@ export class CharacterSheetComponent implements OnInit {
     return cost;
   }
 
-  reputationPointTotal() {
-    let total = this.getReputationCost(this.newReputation);
-    for (const reputation of this.reputations) {
+  reputationPointTotal(newReputation?: Reputation) {
+    let total = newReputation ? this.getReputationCost(newReputation) : 0;
+    for (const reputation of this.character.reputations) {
       total += this.getReputationCost(reputation);
     }
     return total;
   }
 
-  getWealthCost() {
-    let multimillionaireExtraCost = 0;
-    let effectiveWealthLevel = this.wealth;
-    if (this.wealth == 8) {
-      multimillionaireExtraCost = this.lookupTables.cost('wealth', 8) * this.multimillionaireLevel;
-      effectiveWealthLevel = 7;
-    }
-    return this.lookupTables.cost('wealth', effectiveWealthLevel) + multimillionaireExtraCost;
-  }
-
   getStatusCost() {
-    return this.rankReplacesStatus ? 0 : this.lookupTables.cost('status') * this.status;
+    return this.character.rankReplacesStatus ? 0 : this.lookupTables.cost('status') * this.character.status;
   }
 
   getRankCost(rank: Rank) {
@@ -236,69 +115,220 @@ export class CharacterSheetComponent implements OnInit {
     return this.lookupTables.cost(key) * rank.rank;
   }
 
-  addRank() {
-    if (this.newRank.organization) {
-      this.ranks.push(this.newRank);
-      this.newRank = new Rank('', 0, '', false);
-    }
-  }
-
-  rankPointTotal() {
-    let total = this.getRankCost(this.newRank);
-    for (const rank of this.ranks) {
+  rankPointTotal(newRank?: Rank) {
+    let total = newRank ? this.getRankCost(newRank) : 0;
+    for (const rank of this.character.ranks) {
       total += this.getRankCost(rank);
     }
     return total;
   }
-
-  removeRank(rank: Rank) {
-    this.ranks.splice(this.ranks.indexOf(rank), 1);
-  }
-
-  getStatusFromRank() {
-    let statusMod = 0;
-    for (const rank of this.ranks) {
-      if (rank.replacesStatus) {
-        return {statusMod: rank.rank, replacesStatus: true};
-      }
-      statusMod += this.lookupTables.rankStatus(rank.rank);
+  
+  addRank() {
+    if (this.newRank.organization) {
+      this.character.ranks.push(this.newRank);
+      this.newRank = Rank.BLANK;
     }
-    return {statusMod, replacesStatus: false};
+  }
+  
+  removeRank(rank: Rank) {
+    this.character.ranks.splice(this.character.ranks.indexOf(rank), 1);
+  }
+  
+  addReputation() {
+    if (this.newReputation.description !== '' && (this.newReputation.scope == 0 || this.newReputation.group !== '')) {
+      this.character.reputations.push(this.newReputation);
+      this.newReputation = Reputation.BLANK;
+    }
+  }
+  
+  removeReputation(reputation: Reputation) {
+    this.character.reputations.splice(this.character.reputations.indexOf(reputation), 1);
+  }
+  
+  increaseReputationReaction(reputation?: Reputation) {
+    let reaction = reputation ? reputation.reaction : this.newReputation.reaction;
+    if (reaction < 4) {
+      reaction++;
+      if (reputation) {
+        reputation.reaction = reaction;
+      } else {
+        this.newReputation.reaction = reaction;
+      }
+    }
+  }
+  
+  decreaseReputationReaction(reputation?: Reputation) {
+    let reaction = reputation ? reputation.reaction : this.newReputation.reaction;
+    if (reaction > -4) {
+      reaction--;
+      if (reputation) {
+        reputation.reaction = reaction;
+      } else {
+        this.newReputation.reaction = reaction;
+      }
+    }
+  }
+  
+  updateLanguageName(name: string, language?: Language) {
+    if (!language) {
+      this.newLanguage.name = name;
+    } else {
+      language.name = name;
+    }
+  }
+  
+  updateLanguageSpokenComprehension(spokenComprehension: number, language?: Language) {
+    if (!language) {
+      this.newLanguage.spokenComprehension = spokenComprehension;
+    } else {
+      language.spokenComprehension = spokenComprehension;
+    }
+  }
+  
+  updateLanguageWrittenComprehension(writtenComprehension: number, language?: Language) {
+    if (!language) {
+      this.newLanguage.writtenComprehension = writtenComprehension;
+    } else {
+      language.writtenComprehension = writtenComprehension;
+    }
+  }
+  
+  addLanguage() {
+    if (this.newLanguage.name !== '' && (this.newLanguage.spokenComprehension != 0 || this.newLanguage.effectiveWrittenComprehension != 0)) {
+      this.character.languages.push(this.newLanguage);
+      this.newLanguage = new Language('', 0, null);
+    }
+  }
+  
+  removeLanguage(language: Language) {
+    this.character.languages.splice(this.character.languages.indexOf(language), 1);
   }
 
-  get pointTotal() {
-    let pointTotal = 0;
-    this.deltas.forEach((delta, stat) => {
-      const cost = (delta * (this.lookupTables.cost(stat) / this.lookupTables.increment(stat)));
-      const discount = this.activeModifiers.getTotalDiscount(stat, this.lookupTables.maxDiscount(stat));
-      pointTotal += Math.round(cost - (cost * discount));
-    });
-    pointTotal += this.lookupTables.cost('build', this.build);
-    pointTotal += this.appearancePointTotal();
+  changeWealth(value: number) {
+    this.deltas.changeEnum('wealth', value);
+    this.accountForMultimillionaireLevel();
+  }
+  
+  increaseMultimillionaireLevel() {
+    this.deltas.increaseValue('multimillionaireLevel');
+    this.accountForMultimillionaireLevel();
+  }
+  
+  decreaseMultimillionaireLevel() {
+    this.deltas.decreaseValue('multimillionaireLevel', 1);
+    this.accountForMultimillionaireLevel();
+  }
+
+  accountForMultimillionaireLevel() {
+    const wealthDelta = this.deltas.getOrCreate('wealth', DeltaType.Enum);
+    if (!wealthDelta.customCostFunction) {
+      wealthDelta.customCostFunction = () => {
+        return this.getWealthCost();
+      };
+    }
+  }
+
+  getWealthCost() {
+    let multimillionaireExtraCost = 0;
+    let effectiveWealthLevel = this.deltas.moddedValue('wealth');
+    if (this.deltas.moddedValue('wealth') == 8) {
+      multimillionaireExtraCost = this.lookupTables.cost('wealth', 8) * this.deltas.moddedValue('multimillionaireLevel');
+      effectiveWealthLevel = 7;
+    }
+    return this.lookupTables.cost('wealth', effectiveWealthLevel) + multimillionaireExtraCost;
+  }
+
+  //TODO: This should calculate pointValue + deltaPoints
+  get pointValue() {
+    let pointTotal = this.character.pointValue;
+    pointTotal += this.deltas.cost(this.activeModifiers);
     pointTotal += this.languagePointTotal();
-    pointTotal += this.getWealthCost();
     pointTotal += this.reputationPointTotal();
     pointTotal += this.rankPointTotal();
     return pointTotal;
   }
+  
+  get name() {
+    return this.deltas.moddedValue('name');
+  }
+  
+  get player() {
+    return this.deltas.moddedValue('player');
+  }
+  
+  get availablePoints() {
+    return this.character.availablePoints - this.deltas.cost(this.activeModifiers);
+  }
+  
+  get height() {
+    return this.deltas.moddedValue('height');
+  }
+  
+  get weight() {
+    return this.deltas.moddedValue('weight');
+  }
+  
+  get appearance() {
+    return this.deltas.moddedValue('appearance');
+  }
+
+  get appearanceDescription() {
+    return this.deltas.moddedValue('appearanceDescription');
+  }
+
+  get build() {
+    return this.deltas.moddedValue('build');
+  }
 
   get personalTechLevel() {
-    return this.moddedValue(0, 'personalTechLevel');
+    return this.deltas.moddedValue('personalTechLevel');
   }
 
   get st() {
-    return this.moddedValue(10, 'st');
+    return this.deltas.moddedValue('st');
   }
   get dx() {
-    return this.moddedValue(10, 'dx');
+    return this.deltas.moddedValue('dx');
   }
   get iq() {
-    return this.moddedValue(10, 'iq');
+    return this.deltas.moddedValue('iq');
   }
   get ht() {
-    return this.moddedValue(10, 'ht');
+    return this.deltas.moddedValue('ht');
   }
 
+  get basicSpeed() {
+    return this.deltas.moddedValue('basicSpeed');
+  }
+
+  get basicMove() {
+    return this.deltas.moddedValue('basicMove');
+  }
+
+  get hp() {
+    return this.deltas.moddedValue('hp');
+  }
+
+  get will() {
+    return this.deltas.moddedValue('will');
+  }
+
+  get per() {
+    return this.deltas.moddedValue('per');
+  }
+
+  get fp() {
+    return this.deltas.moddedValue('fp');
+  }
+
+  get size() {
+    const sizeModifier = this.deltas.moddedValue('size');
+    if (sizeModifier > 0) {
+      return '+' + sizeModifier;
+    }
+    return sizeModifier;
+  }
+  
   get basicLift() {
     let lift = (this.st * this.st) / 5;
     if (lift >= 10) {
@@ -313,38 +343,6 @@ export class CharacterSheetComponent implements OnInit {
 
   get damageSw() {
     return this.lookupTables.swingDamage(this.st);
-  }
-
-  get basicSpeed() {
-    return this.moddedValue((this.ht + this.dx) / 4, 'basicSpeed');
-  }
-
-  get basicMove() {
-    return this.moddedValue(Math.floor(this.basicSpeed), 'basicMove');
-  }
-
-  get hp() {
-    return this.moddedValue(this.st, 'hp');
-  }
-
-  get will() {
-    return this.moddedValue(this.iq, 'will');
-  }
-
-  get per() {
-    return this.moddedValue(this.iq, 'per');
-  }
-
-  get fp() {
-    return this.moddedValue(this.ht, 'fp');
-  }
-
-  get size() {
-    const sizeModifier = this.moddedValue(0, 'size');
-    if (sizeModifier > 0) {
-      return '+' + sizeModifier;
-    }
-    return sizeModifier;
   }
 
   get dodge() {
@@ -391,18 +389,51 @@ export class CharacterSheetComponent implements OnInit {
     return this.dodge - 4;
   }
 
-  get unspentPoints() {
-    return this.STARTING_POINTS - this.pointTotal;
+  get effectiveStatus() {
+    return this.character.effectiveStatus;
   }
 
-  get effectiveStatus() {
-    const statusFromRank = this.getStatusFromRank();
-    if(statusFromRank.replacesStatus) {
-      this.rankReplacesStatus = true;
-      return statusFromRank.statusMod;
-    } else {
-      this.rankReplacesStatus = false;
-    }
-    return this.status + statusFromRank.statusMod;
+  get wealth() {
+    return this.deltas.moddedValue('wealth');
+  }
+
+  get multimillionaireLevel() {
+    return this.deltas.moddedValue('multimillionaireLevel');
+  }
+
+  get status() {
+    return this.deltas.moddedValue('status');
+  }
+
+  get languages() {
+    return this.deltas.moddedValue('languages');
+  }
+
+  get reputations() {
+    return this.deltas.moddedValue('reputations');
+  }
+
+  get ranks() {
+    return this.deltas.moddedValue('ranks');
+  }
+
+  get rankReplacesStatus() {
+    return this.deltas.moddedValue('rankReplacesStatus');
+  }
+
+  get androgynous() {
+    return this.deltas.moddedValue('androgynous');
+  }
+
+  get impressive() {
+    return this.deltas.moddedValue('impressive');
+  }
+
+  get universal() {
+    return this.deltas.moddedValue('universal');
+  }
+
+  get offTheShelfLooks() {
+    return this.deltas.moddedValue('offTheShelfLooks');
   }
 }

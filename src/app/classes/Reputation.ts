@@ -1,4 +1,6 @@
 export class Reputation {
+    static BLANK = new Reputation('', 0, 0, '', 0, false);
+
     description: string;
     reaction: number;
     scope: number;

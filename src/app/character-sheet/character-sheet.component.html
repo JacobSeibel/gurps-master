@@ -3,14 +3,14 @@
 	<tr>
 		<td>NAME</td>
 		<td>PLAYER</td>
-		<td>POINT TOTAL</td>
-		<td>UNSPENT POINTS</td>
+		<td>POINT VALUE</td>
+		<td>AVAILABLE POINTS</td>
 	</tr>
 	<tr>
-		<td><input [value]="name" (input)="name = $event.target.value"/></td>
-		<td><input [value]="player" (input)="player = $event.target.value"/></td>
-		<td>{{pointTotal}}</td>
-		<td>{{unspentPoints}}</td>
+		<td><input [value]="name" (input)="deltas.changeString('name', $event.target.value)"/></td>
+		<td><input [value]="player" (input)="deltas.changeString('player', $event.target.value)"/></td>
+		<td>{{pointValue}}</td>
+		<td>{{availablePoints}}</td>
 	</tr>
 	<tr>
 		<td>HEIGHT</td>
@@ -19,16 +19,16 @@
 		<td>PERSONAL TECH LEVEL</td>
 	</tr>
 	<tr>
-		<td><input [value]="height" (input)="height = $event.target.value"/></td>
-		<td><input [value]="weight" (input)="weight = $event.target.value"/> lbs</td>
+		<td><input [value]="height" (input)="deltas.changeString('height', $event.target.value)"/></td>
+		<td><input [value]="weight" (input)="deltas.changeString('weight', $event.target.value)"/> lbs</td>
 		<td>{{size}}</td>
 		<td>{{personalTechLevel}}</td>
 	</tr>
 	<tr>
 		<td></td>
 		<td></td>
-		<td><button (click)="increaseStat('size')">+</button><button (click)="decreaseStat('size')">-</button></td>
-		<td><button (click)="increaseStat('personalTechLevel')">+</button><button (click)="decreaseStat('personalTechLevel')">-</button></td>
+		<td><button (click)="increaseSize()">+</button><button (click)="decreaseSize()">-</button></td>
+		<td><button (click)="deltas.increaseValue('personalTechLevel')">+</button><button (click)="deltas.decreaseValue('personalTechLevel')">-</button></td>
 	</tr>
 	<tr>
 		<td>APPEARANCE</td>
@@ -37,7 +37,7 @@
 	</tr>
 	<tr>
 		<td>
-			<select [value]="appearance" (input)="appearance = $event.target.value">
+			<select [value]="appearance" (input)="changeAppearanceValue('appearance', $event.target.value)">
 				<option value=0>Horrific</option>
 				<option value=1>Monstrous</option>
 				<option value=2>Hideous</option>
@@ -50,13 +50,13 @@
 				<option value=9>Transcendent</option>
 			</select>
 			<br>
-			<input type="checkbox" [checked]= "androgynous" (change)= "androgynous = !androgynous"> Androgynous <br>
-			<input type="checkbox" [checked]= "impressive" (change)= "impressive = !impressive"> Impressive <br>
-			<input type="checkbox" [checked]= "universal" (change)= "universal = !universal"> Universal <br>
-			<input type="checkbox" [checked]= "offTheShelfLooks" (change)= "offTheShelfLooks = !offTheShelfLooks"> Off-the-Shelf Looks
+			<input type="checkbox" [checked]= "androgynous" (change)= "changeAppearanceValue('androgynous', !androgynous)"> Androgynous <br>
+			<input type="checkbox" [checked]= "impressive" (change)= "changeAppearanceValue('impressive', !impressive)"> Impressive <br>
+			<input type="checkbox" [checked]= "universal" (change)= "changeAppearanceValue('universal', !universal)"> Universal <br>
+			<input type="checkbox" [checked]= "offTheShelfLooks" (change)= "changeAppearanceValue('offTheShelfLooks', !offTheShelfLooks)"> Off-the-Shelf Looks
 		</td>
-		<td><input [value]="appearanceDescription" (input)="appearanceDescription = $event.target.value"/></td>
-		<td><select [value]="build" (input)="build = $event.target.value">
+		<td><input [value]="appearanceDescription" (input)="deltas.changeString('appearanceDescription', $event.target.value)"/></td>
+		<td><select [value]="build" (input)="deltas.changeEnum('build', $event.target.value)">
 			<option value=0>Skinny</option>
 			<option value=1>Average</option>
 			<option value=2>Overweight</option>
@@ -120,14 +120,14 @@
 		</td>
 	</tr>
 	<tr>
-		<td><button (click)="increaseStat('st')">+</button><button (click)="decreaseStat('st', 1)">-</button></td>
-		<td><button (click)="increaseStat('dx')">+</button><button (click)="decreaseStat('dx', 1)">-</button></td>
-		<td><button (click)="increaseStat('iq')">+</button><button (click)="decreaseStat('iq', 1)">-</button></td>
-		<td><button (click)="increaseStat('ht')">+</button><button (click)="decreaseStat('ht', 1)">-</button></td>
-		<td><button (click)="increaseStat('hp')">+</button><button (click)="decreaseStat('hp')">-</button></td>
-		<td><button (click)="increaseStat('will')">+</button><button (click)="decreaseStat('will')">-</button></td>
-		<td><button (click)="increaseStat('per')">+</button><button (click)="decreaseStat('per')">-</button></td>
-		<td><button (click)="increaseStat('fp')">+</button><button (click)="decreaseStat('fp')">-</button></td>
+		<td><button (click)="deltas.increaseValue('st')">+</button><button (click)="deltas.decreaseValue('st', 1)">-</button></td>
+		<td><button (click)="deltas.increaseValue('dx')">+</button><button (click)="deltas.decreaseValue('dx', 1)">-</button></td>
+		<td><button (click)="deltas.increaseValue('iq')">+</button><button (click)="deltas.decreaseValue('iq', 1)">-</button></td>
+		<td><button (click)="deltas.increaseValue('ht')">+</button><button (click)="deltas.decreaseValue('ht', 1)">-</button></td>
+		<td><button (click)="deltas.increaseValue('hp')">+</button><button (click)="deltas.decreaseValue('hp')">-</button></td>
+		<td><button (click)="deltas.increaseValue('will')">+</button><button (click)="deltas.decreaseValue('will')">-</button></td>
+		<td><button (click)="deltas.increaseValue('per')">+</button><button (click)="deltas.decreaseValue('per')">-</button></td>
+		<td><button (click)="deltas.increaseValue('fp')">+</button><button (click)="deltas.decreaseValue('fp')">-</button></td>
 	</tr>
 </table>
 <hr/>
@@ -150,8 +150,8 @@
 		<td></td>
 		<td></td>
 		<td></td>
-		<td><button (click)="increaseStat('basicSpeed')">+</button><button (click)="decreaseStat('basicSpeed')">-</button></td>
-		<td><button (click)="increaseStat('basicMove')">+</button><button (click)="decreaseStat('basicMove')">-</button></td>
+		<td><button (click)="deltas.increaseValue('basicSpeed')">+</button><button (click)="deltas.decreaseValue('basicSpeed')">-</button></td>
+		<td><button (click)="deltas.increaseValue('basicMove')">+</button><button (click)="deltas.decreaseValue('basicMove')">-</button></td>
 	</tr>
 </table>
 <hr/>
@@ -262,7 +262,7 @@
 		<td>COST</td>
 	</tr>
 	<tr>
-		<td><select [value]="wealth" (input)="wealth = $event.target.value">
+		<td><select [value]="wealth" (input)="changeWealth($event.target.value)">
 			<option value=0>Dead Broke</option>
 			<option value=1>Poor</option>
 			<option value=2>Struggling</option>
@@ -282,7 +282,7 @@
 		<td></td>
 		<td *ngIf="wealth == 8"><button (click)="increaseMultimillionaireLevel()">+</button><button (click)="decreaseMultimillionaireLevel()">-</button></td>
 		<td></td>
-		<td><button (click)="status = status + 1">+</button><button (click)="status = status - 1">-</button></td>
+		<td><button (click)="deltas.increaseValue('status')">+</button><button (click)="deltas.decreaseValue('status')">-</button></td>
 		<td></td>
 	</tr>
 </table>
