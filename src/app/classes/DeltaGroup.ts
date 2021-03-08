@@ -32,6 +32,14 @@ export class DeltaGroup {
         return this.deltas.get(attribute).moddedValue();
     }
 
+    //TODO: Make various paths based on DeltaType
+    valueChange(attribute: string) {
+        if (this.deltas.has(attribute)) {
+            return this.deltas.get(attribute).valueChange();
+        }
+        return 0;
+    }
+
     increaseValue(attribute: string) {
         const delta = this.getOrCreate(attribute, DeltaType.Number);
         delta.increaseValue(this.lookupTables.increment(attribute));

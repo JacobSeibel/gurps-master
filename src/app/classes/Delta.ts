@@ -23,6 +23,10 @@ export class Delta {
         return this.newValue;
     }
 
+    valueChange() {
+        return this.newValue - this.oldValue;
+    }
+
     increaseValue(amount: number) {
         if (this.type != DeltaType.Number) throwError(new Error('increaseValue requires a Number type'));
 

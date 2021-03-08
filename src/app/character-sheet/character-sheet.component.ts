@@ -433,19 +433,19 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   get hp() {
-    return this.deltas.moddedValue('hp');
+    return this.deltas.moddedValue('hp') + this.deltas.valueChange('st');
   }
 
   get will() {
-    return this.deltas.moddedValue('will');
+    return this.deltas.moddedValue('will') + this.deltas.valueChange('iq');
   }
 
   get per() {
-    return this.deltas.moddedValue('per');
+    return this.deltas.moddedValue('per') + this.deltas.valueChange('iq');
   }
 
   get fp() {
-    return this.deltas.moddedValue('fp');
+    return this.deltas.moddedValue('fp') + this.deltas.valueChange('ht');
   }
 
   get size() {
