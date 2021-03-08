@@ -50,7 +50,6 @@ export class Character {
 
   // RANK
   ranks: Rank[] = [];
-  rankReplacesStatus = false;
 
   // MISC
   personalTechLevel = 0;
@@ -60,15 +59,25 @@ export class Character {
     this.availablePoints = availablePoints;
   }
   
-  getStatusFromRank() {
+  getStatusFromRank(moddedRanks?: Rank[]) {
     let statusMod = 0;
-    for (const rank of this.ranks) {
+    const ranks = moddedRanks ? moddedRanks : this.ranks;
+    for (const rank of ranks) {
       if (rank.replacesStatus) {
         return {statusMod: rank.rank, replacesStatus: true};
       }
       statusMod += this.lookupTables.rankStatus(rank.rank);
     }
     return {statusMod, replacesStatus: false};
+  }
+
+  getEffectiveStatus(moddedStatus?: number, moddedRanks?: Rank[]) {
+    const status = moddedStatus ? moddedStatus : this.status;
+    const statusFromRank = this.getStatusFromRank(moddedRanks);
+    if(statusFromRank.replacesStatus) {
+      return statusFromRank.statusMod;
+    }
+    return status + statusFromRank.statusMod;
   }
 
   get basicLift() {
@@ -131,14 +140,12 @@ export class Character {
     return this.dodge - 4;
   }
 
-  get effectiveStatus() {
-    const statusFromRank = this.getStatusFromRank();
-    if(statusFromRank.replacesStatus) {
-      this.rankReplacesStatus = true;
-      return statusFromRank.statusMod;
-    } else {
-      this.rankReplacesStatus = false;
+  get rankReplacesStatus() {
+    for(const rank of this.ranks) {
+      if (rank.replacesStatus) {
+        return true;
+      }
     }
-    return this.status + statusFromRank.statusMod;
+    return false;
   }
 }

@@ -363,6 +363,14 @@ export class CharacterSheetComponent implements OnInit {
     return pointTotal;
   }
 
+  getEffectiveStatus() {
+    return this.character.getEffectiveStatus(this.deltas.moddedValue('status'), this.moddedAndNewArray('ranks', this.newRank));
+  }
+
+  moddedAndNewArray(attribute: string, newObject: Object) {
+    return this.deltas.moddedValue(attribute).concat([newObject]);
+  }
+
   get pointValue() {
     return this.character.pointValue + this.getLiveCost();
   }
@@ -508,10 +516,6 @@ export class CharacterSheetComponent implements OnInit {
     return this.dodge - 4;
   }
 
-  get effectiveStatus() {
-    return this.character.effectiveStatus;
-  }
-
   get wealth() {
     return this.deltas.moddedValue('wealth');
   }
@@ -537,7 +541,12 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   get rankReplacesStatus() {
-    return this.deltas.moddedValue('rankReplacesStatus');
+    for(const rank of this.moddedAndNewArray('ranks', this.newRank)) {
+      if (rank.replacesStatus) {
+        return true;
+      }
+    }
+    return false;
   }
 
   get androgynous() {

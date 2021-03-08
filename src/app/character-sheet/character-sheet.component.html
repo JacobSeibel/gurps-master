@@ -275,7 +275,7 @@
 		</select></td>
 		<td *ngIf="wealth == 8">{{multimillionaireLevel}}</td>
 		<td>{{getWealthCost()}}</td>
-		<td>{{effectiveStatus}}</td>
+		<td>{{getEffectiveStatus()}}</td>
 		<td>{{getStatusCost()}}</td>
 	</tr>
 	<tr>
@@ -383,7 +383,7 @@
 		<td><input [value]="newRank.organization" (input)="changeRankOrganization($event.target.value)"></td>
 		<td>{{newRank.rank}}</td>
 		<td><input [value]="newRank.description" (input)="changeRankDescription($event.target.value)"></td>
-		<td><input type="checkbox" [checked]="newRank.replacesStatus" (change)="changeRankReplacesStatus()" [disabled]="rankReplacesStatus"></td>
+		<td><input type="checkbox" [checked]="newRank.replacesStatus" (change)="changeRankReplacesStatus()" [disabled]="rankReplacesStatus && !newRank.replacesStatus"></td>
 		<td>{{getRankCost(newRank)}}</td>
 		<td><button (click)="addRank()">+</button></td>
 	</tr>
