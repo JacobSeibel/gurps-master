@@ -1,6 +1,4 @@
 export class Reputation {
-    static BLANK = new Reputation('', 0, 0, '', 0, false);
-
     description: string;
     reaction: number;
     scope: number;
@@ -19,5 +17,9 @@ export class Reputation {
 
     get effectiveGroup() {
       return this.scope != 0 ? this.group : '';
+    }
+
+    static blank() {
+      return new Reputation('', 0, 0, '', 0, false);
     }
   }

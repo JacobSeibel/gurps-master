@@ -1,6 +1,4 @@
 export class Rank {
-    static BLANK = new Rank('', 0, '', false);
-
     organization: string;
     rank: number;
     description: string;
@@ -15,5 +13,9 @@ export class Rank {
 
     copy() {
       return new Rank(this.organization, this.rank, this.description, this.replacesStatus);
+    }
+
+    static blank() {
+      return new Rank('', 0, '', false);
     }
   }

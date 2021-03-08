@@ -12,4 +12,8 @@ export class Language {
   get effectiveWrittenComprehension() {
     return this.writtenComprehension ? this.writtenComprehension : this.spokenComprehension;
   }
+
+  static blank() {
+    return new Language('', 0, null);
+  }
 }

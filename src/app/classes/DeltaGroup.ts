@@ -21,6 +21,10 @@ export class DeltaGroup {
         return this.deltas.get(attribute);
     }
 
+    has(attribute: string) {
+        return this.deltas.has(attribute);
+    }
+
     moddedValue(attribute: string) {
         if (!this.deltas.has(attribute)) {
             return this.objectBeingChanged[attribute];
@@ -56,6 +60,17 @@ export class DeltaGroup {
 
     changeArray(attribute: string, newValue: any, index: number) {
         this.changeValue(attribute, newValue, DeltaType.Array, index);
+    }
+
+    pushToArray(attribute: string, newValue: any) {
+        const delta = this.getOrCreate(attribute, DeltaType.Array);
+        (delta.moddedValue() as any[]).push(newValue);
+    }
+
+    removeFromArray(attribute: string, removeValue: any) {
+        const delta = this.getOrCreate(attribute, DeltaType.Array); //Should this not allow create?
+        const array = (delta.moddedValue() as any[]);
+        return array.splice(array.indexOf(removeValue), 1);
     }
 
     private changeValue(attribute: string, newValue: any, type: DeltaType, index?: number) {
