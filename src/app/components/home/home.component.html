@@ -1,9 +1,10 @@
 <h1>Welcome to GURPS Master</h1>
-<select (change)="selectedCharacter = $event.target.value">
+<select value="" (change)="selectedCharacterId = $event.target.value">
+    <option></option>
     <ng-container *ngFor="let character of characters">
-        <option [value]="character">
+        <option [value]="character.id">
             {{character.name}}
         </option>
     </ng-container>
 </select>
-<button (click)="openCharacterSheet">Open Character Sheet</button>
+<button (click)="openCharacterSheet()">Open Character Sheet</button>
