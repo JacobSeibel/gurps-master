@@ -10,9 +10,15 @@ export class CharacterService {
 
   constructor(private http: HttpClient) { }
 
-  characters(): Observable<HttpResponse<{characters: Character[]}>> {
+  characters(): Promise<HttpResponse<{characters: Character[]}>> {
     return this.http.get<{characters: Character[]}>(
       "http://127.0.0.1:5000/character",
-      {observe: 'response'});
+      {observe: 'response'}).toPromise();
+  }
+
+  character(id: number): Promise<HttpResponse<Character>> {
+    return this.http.get<Character>(
+      `http://127.0.0.1:5000/character/${id}`,
+      {observe: 'response'}).toPromise();
   }
 }

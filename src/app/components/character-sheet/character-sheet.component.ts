@@ -7,6 +7,8 @@ import { Rank } from '../../classes/Rank';
 import { Character } from '../../classes/Character';
 import { DeltaGroup } from '../../classes/DeltaGroup';
 import { DeltaType } from '../../enums/DeltaType';
+import { CharacterService } from 'src/app/services/character.service';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 
 @Component({
   selector: 'app-character-sheet',
@@ -17,19 +19,33 @@ export class CharacterSheetComponent implements OnInit {
   // TODO: Allow configuration
   STARTING_POINTS = 125;
 
-  deltas: DeltaGroup;
+  character: Character = new Character(this.lookupTables, this.STARTING_POINTS);
+  deltas: DeltaGroup = new DeltaGroup(this.character, this.lookupTables);
   activeModifiers: ModifierGroup = new ModifierGroup();
-  character: Character;
 
   newLanguage = new Language('', 3, undefined);
   newReputation = new Reputation('', 0, 0, '', 0, false);
   newRank = new Rank('', 0, '', false);
 
-  constructor(private lookupTables: LookupTablesService) {
-    this.character = new Character(lookupTables, this.STARTING_POINTS);
-    this.deltas = new DeltaGroup(this.character, lookupTables);
+  constructor(private lookupTables: LookupTablesService,
+              private characterService: CharacterService,
+              private route: ActivatedRoute) {
   }
-  ngOnInit(): void {}
+  
+  async ngOnInit() {
+    let id: number;
+    this.route.paramMap.subscribe((params: ParamMap) => {
+      id = +params.get('id')
+    })
+    if (id) {
+      this.character = await this.getCharacter(id);
+    }
+    this.deltas = new DeltaGroup(this.character, this.lookupTables);
+  }
+
+  async getCharacter(id: number) {
+    return (await this.characterService.character(id)).body;
+  }
 
   increaseSize() {
     this.deltas.increaseValue('size');
@@ -68,14 +84,14 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   languagePointTotal() {
-    const languages = this.deltas.moddedValue('languages');
+    // const languages = this.deltas.moddedValue('languages');
     let total = 0;
-    let freeNative = true;
-    for (const language of languages) {
-      total += this.getLanguageCost(language, freeNative);
-      freeNative = false;
-    } 
-    total += this.getLanguageCost(this.newLanguage, freeNative);
+    // let freeNative = true;
+    // for (const language of languages) {
+    //   total += this.getLanguageCost(language, freeNative);
+    //   freeNative = false;
+    // } 
+    // total += this.getLanguageCost(this.newLanguage, freeNative);
     return total;
   }
 
@@ -99,14 +115,14 @@ export class CharacterSheetComponent implements OnInit {
 
   reputationPointTotal() {
     let total = this.getReputationCost(this.newReputation);
-    for (const reputation of this.deltas.moddedValue('reputations')) {
-      total += this.getReputationCost(reputation);
-    }
+    // for (const reputation of this.deltas.moddedValue('reputations')) {
+    //   total += this.getReputationCost(reputation);
+    // }
     return total;
   }
 
   getStatusCost() {
-    return this.character.rankReplacesStatus ? 0 : this.lookupTables.cost('status') * this.character.status;
+    return this.deltas.moddedValue('rankReplacesStatus') ? 0 : this.lookupTables.cost('status') * this.deltas.moddedValue('status');
   }
 
   getRankCost(rank: Rank) {
@@ -116,9 +132,9 @@ export class CharacterSheetComponent implements OnInit {
 
   rankPointTotal() {
     let total = this.getRankCost(this.newRank);
-    for (const rank of this.deltas.moddedValue('ranks')) {
-      total += this.getRankCost(rank);
-    }
+    // for (const rank of this.deltas.moddedValue('ranks')) {
+    //   total += this.getRankCost(rank);
+    // }
     return total;
   }
   
@@ -364,7 +380,11 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   getEffectiveStatus() {
-    return this.character.getEffectiveStatus(this.deltas.moddedValue('status'), this.moddedAndNewArray('ranks', this.newRank));
+    // return Character.getEffectiveStatus(
+    //   this.deltas.moddedValue('status'),
+    //   this.moddedAndNewArray('ranks', this.newRank),
+    //   this.lookupTables);
+    return this.deltas.moddedValue('status');
   }
 
   moddedAndNewArray(attribute: string, newObject: Object) {
@@ -541,11 +561,11 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   get rankReplacesStatus() {
-    for(const rank of this.moddedAndNewArray('ranks', this.newRank)) {
-      if (rank.replacesStatus) {
-        return true;
-      }
-    }
+    // for(const rank of this.moddedAndNewArray('ranks', this.newRank)) {
+    //   if (rank.replacesStatus) {
+    //     return true;
+    //   }
+    // }
     return false;
   }
 

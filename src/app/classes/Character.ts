@@ -64,25 +64,31 @@ export class Character {
     this.availablePoints = availablePoints;
   }
   
-  getStatusFromRank(moddedRanks?: Rank[]) {
+  static getStatusFromRank(ranks: Rank[], lookupTables: LookupTablesService) {
     let statusMod = 0;
-    const ranks = moddedRanks ? moddedRanks : this.ranks;
     for (const rank of ranks) {
       if (rank.replacesStatus) {
         return {statusMod: rank.rank, replacesStatus: true};
       }
-      statusMod += this.lookupTables.rankStatus(rank.rank);
+      statusMod += lookupTables.rankStatus(rank.rank);
     }
     return {statusMod, replacesStatus: false};
   }
 
-  getEffectiveStatus(moddedStatus?: number, moddedRanks?: Rank[]) {
-    const status = moddedStatus ? moddedStatus : this.status;
-    const statusFromRank = this.getStatusFromRank(moddedRanks);
+  getStatusFromRank() {
+    return Character.getStatusFromRank(this.ranks, this.lookupTables);
+  }
+
+  static getEffectiveStatus(status: number, ranks: Rank[], lookupTables: LookupTablesService) {
+    const statusFromRank = Character.getStatusFromRank(ranks, lookupTables);
     if(statusFromRank.replacesStatus) {
       return statusFromRank.statusMod;
     }
     return status + statusFromRank.statusMod;
+  }
+
+  getEffectiveStatus() {
+    return Character.getEffectiveStatus(this.status, this.ranks, this.lookupTables);
   }
 
   get basicLift() {

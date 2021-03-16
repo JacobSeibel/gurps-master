@@ -17,11 +17,8 @@ export class HomeComponent implements OnInit {
     this.characterService = characterService;
   }
 
-  ngOnInit(): void {
-    this.characterService.characters().subscribe((response) => {
-      this.characters = response.body.characters;
-      console.log(this.characters);
-    })
+  async ngOnInit() {
+    this.characters = (await this.characterService.characters()).body.characters;
   }
 
   openCharacterSheet() {
