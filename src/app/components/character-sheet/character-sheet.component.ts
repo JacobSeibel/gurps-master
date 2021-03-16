@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { LookupTablesService } from '../lookup-tables.service';
-import { ModifierGroup } from '../classes/Modifier';
-import { Language } from '../classes/Language';
-import { Reputation } from '../classes/Reputation';
-import { Rank } from '../classes/Rank';
-import { Character } from '../classes/Character';
-import { DeltaGroup } from '../classes/DeltaGroup';
-import { DeltaType } from '../enums/DeltaType';
+import { LookupTablesService } from '../../services/lookup-tables.service';
+import { ModifierGroup } from '../../classes/Modifier';
+import { Language } from '../../classes/Language';
+import { Reputation } from '../../classes/Reputation';
+import { Rank } from '../../classes/Rank';
+import { Character } from '../../classes/Character';
+import { DeltaGroup } from '../../classes/DeltaGroup';
+import { DeltaType } from '../../enums/DeltaType';
 
 @Component({
   selector: 'app-character-sheet',

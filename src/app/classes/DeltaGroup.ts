@@ -1,5 +1,5 @@
 import { DeltaType } from "../enums/DeltaType";
-import { LookupTablesService } from "../lookup-tables.service";
+import { LookupTablesService } from "../services/lookup-tables.service";
 import { Delta } from "./Delta";
 import { ModifierGroup } from "./Modifier";
 

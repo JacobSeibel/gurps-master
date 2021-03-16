@@ -1,9 +1,11 @@
-import { LookupTablesService } from "../lookup-tables.service";
+import { LookupTablesService } from "../services/lookup-tables.service";
 import { Language } from "./Language";
 import { Rank } from "./Rank";
 import { Reputation } from "./Reputation";
 
 export class Character {
+  id: number;
+
   pointValue = 0;
   availablePoints = 0;
 
