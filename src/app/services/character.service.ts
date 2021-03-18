@@ -4,6 +4,7 @@ import { Character } from '../classes/Character';
 import { LookupTablesService } from './lookup-tables.service';
 import { Language } from '../classes/Language';
 import { Reputation } from '../classes/Reputation';
+import { Rank } from '../classes/Rank';
 
 @Injectable({
   providedIn: 'root'
@@ -61,6 +62,19 @@ export class CharacterService {
           )
           newRep.id = incomingReputation.id;
           value.push(newRep);
+        }
+      } else if (key === 'ranks') {
+        value = [];
+        let incomingRanks = character[key];
+        for (let incomingRank of incomingRanks) {
+          let newRank = new Rank(
+            incomingRank.organization,
+            incomingRank.rank,
+            incomingRank.description,
+            incomingRank.replacesStatus
+          )
+          newRank.id = incomingRank.id;
+          value.push(newRank);
         }
       }
       hydratedCharacter[key] = value;

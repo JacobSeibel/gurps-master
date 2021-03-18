@@ -133,9 +133,9 @@ export class CharacterSheetComponent implements OnInit {
 
   rankPointTotal() {
     let total = this.getRankCost(this.newRank);
-    // for (const rank of this.deltas.moddedValue('ranks')) {
-    //   total += this.getRankCost(rank);
-    // }
+    for (const rank of this.deltas.moddedValue('ranks')) {
+      total += this.getRankCost(rank);
+    }
     return total;
   }
   
@@ -381,10 +381,10 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   getEffectiveStatus() {
-    // return Character.getEffectiveStatus(
-    //   this.deltas.moddedValue('status'),
-    //   this.moddedAndNewArray('ranks', this.newRank),
-    //   this.lookupTables);
+    return Character.getEffectiveStatus(
+      this.deltas.moddedValue('status'),
+      this.moddedAndNewArray('ranks', this.newRank),
+      this.lookupTables);
     return this.deltas.moddedValue('status');
   }
 
@@ -562,11 +562,11 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   get rankReplacesStatus() {
-    // for(const rank of this.moddedAndNewArray('ranks', this.newRank)) {
-    //   if (rank.replacesStatus) {
-    //     return true;
-    //   }
-    // }
+    for(const rank of this.moddedAndNewArray('ranks', this.newRank)) {
+      if (rank.replacesStatus) {
+        return true;
+      }
+    }
     return false;
   }
 
