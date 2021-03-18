@@ -217,7 +217,7 @@
 		<td>WRITTEN COMPREHENSION</td>
 		<td>COST</td>
 	</tr>
-	<!-- <tr *ngFor="let language of languages; let i = index">
+	<tr *ngFor="let language of languages; let i = index">
 		<td><input [value]="language.name" (change)="updateLanguageName($event.target.value, language, i)"/></td>
 		<td><select [value]="language.spokenComprehension" (change)="updateLanguageSpokenComprehension($event.target.value, language, i)">
 			<option value=0>None</option>
@@ -235,8 +235,8 @@
 			<span>{{getLanguageCost(language, i === 0)}}</span>
 		</td>
 		<td><button (click)="removeLanguage(language)">-</button></td>
-	</tr> -->
-	<!-- <tr>
+	</tr>
+	<tr>
 		<td><input [value]="newLanguage.name" (change)="updateLanguageName($event.target.value)"/></td>
 		<td><select [value]="newLanguage.spokenComprehension" (change)="updateLanguageSpokenComprehension($event.target.value)">
 			<option value=0>None</option>
@@ -252,7 +252,7 @@
 		</select></td>
 		<td><span>{{getLanguageCost(newLanguage, languages.length === 0)}}</span></td>
 		<td><button (click)="addLanguage()">+</button></td>
-	</tr> -->
+	</tr>
 </table>
 <hr/>
 <h3>WEALTH AND STATUS</h3>

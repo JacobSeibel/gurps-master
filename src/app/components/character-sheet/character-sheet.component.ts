@@ -44,7 +44,8 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   async getCharacter(id: number) {
-    return (await this.characterService.character(id)).body;
+    const unhydratedCharacter = (await this.characterService.character(id)).body;
+    return this.characterService.hydrateCharacter(unhydratedCharacter);
   }
 
   increaseSize() {
@@ -84,14 +85,14 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   languagePointTotal() {
-    // const languages = this.deltas.moddedValue('languages');
+    const languages = this.deltas.moddedValue('languages');
     let total = 0;
-    // let freeNative = true;
-    // for (const language of languages) {
-    //   total += this.getLanguageCost(language, freeNative);
-    //   freeNative = false;
-    // } 
-    // total += this.getLanguageCost(this.newLanguage, freeNative);
+    let freeNative = true;
+    for (const language of languages) {
+      total += this.getLanguageCost(language, freeNative);
+      freeNative = false;
+    } 
+    total += this.getLanguageCost(this.newLanguage, freeNative);
     return total;
   }
 
@@ -549,7 +550,7 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   get languages() {
-    return this.deltas.moddedValue('languages');
+    return this.deltas.moddedValue('languages') as Language[];
   }
 
   get reputations() {

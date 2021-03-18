@@ -40,7 +40,6 @@ export class Character {
   offTheShelfLooks = false;
 
   // LANGUAGE
-  languagesFk: number;
   languages: Language[] = [];
 
   // WEALTH AND STATUS
