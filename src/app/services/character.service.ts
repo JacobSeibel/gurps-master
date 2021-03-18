@@ -3,6 +3,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Character } from '../classes/Character';
 import { LookupTablesService } from './lookup-tables.service';
 import { Language } from '../classes/Language';
+import { Reputation } from '../classes/Reputation';
 
 @Injectable({
   providedIn: 'root'
@@ -45,6 +46,21 @@ export class CharacterService {
             incomingLanguage.writtenComprehension);
           newLang.id = incomingLanguage.id;
           value.push(newLang);
+        }
+      } else if (key === 'reputations') {
+        value = [];
+        let incomingReputations = character[key];
+        for (let incomingReputation of incomingReputations) {
+          let newRep = new Reputation(
+            incomingReputation.description,
+            incomingReputation.reaction,
+            incomingReputation.scope,
+            incomingReputation.group,
+            incomingReputation.frequency,
+            incomingReputation.free
+          )
+          newRep.id = incomingReputation.id;
+          value.push(newRep);
         }
       }
       hydratedCharacter[key] = value;

@@ -116,9 +116,9 @@ export class CharacterSheetComponent implements OnInit {
 
   reputationPointTotal() {
     let total = this.getReputationCost(this.newReputation);
-    // for (const reputation of this.deltas.moddedValue('reputations')) {
-    //   total += this.getReputationCost(reputation);
-    // }
+    for (const reputation of this.deltas.moddedValue('reputations')) {
+      total += this.getReputationCost(reputation);
+    }
     return total;
   }
 

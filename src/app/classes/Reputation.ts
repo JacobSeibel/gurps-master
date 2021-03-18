@@ -1,4 +1,5 @@
 export class Reputation {
+    id: number;
     description: string;
     reaction: number;
     scope: number;
