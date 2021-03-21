@@ -2,11 +2,13 @@ import { DeltaType } from "../enums/DeltaType";
 import { LookupTablesService } from "../services/lookup-tables.service";
 import { Delta } from "./Delta";
 import { ModifierGroup } from "./Modifier";
+import { Rank } from "./Rank";
 
 export class DeltaGroup {
     objectBeingChanged: Object;
     deltas: Map<string, Delta>;
     lookupTables: LookupTablesService;
+    testing: Rank[];
 
     constructor(objectBeingChanged: Object, lookupTables: LookupTablesService) {
         this.objectBeingChanged = objectBeingChanged;
@@ -76,7 +78,7 @@ export class DeltaGroup {
     }
 
     removeFromArray(attribute: string, removeValue: any) {
-        const delta = this.getOrCreate(attribute, DeltaType.Array); //Should this not allow create?
+        const delta = this.getOrCreate(attribute, DeltaType.Array);
         const array = (delta.moddedValue() as any[]);
         return array.splice(array.indexOf(removeValue), 1);
     }

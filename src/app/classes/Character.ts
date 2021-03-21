@@ -48,11 +48,9 @@ export class Character {
   status: number = 0;
 
   // REPUTATION
-  reputationsFk: number;
   reputations: Reputation[] = [];
 
   // RANK
-  ranksFk: number;
   ranks: Rank[] = [];
 
   // MISC

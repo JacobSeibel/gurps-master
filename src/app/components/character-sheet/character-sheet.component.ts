@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, OnChanges, OnInit } from '@angular/core';
 import { LookupTablesService } from '../../services/lookup-tables.service';
 import { ModifierGroup } from '../../classes/Modifier';
 import { Language } from '../../classes/Language';
@@ -9,6 +9,7 @@ import { DeltaGroup } from '../../classes/DeltaGroup';
 import { DeltaType } from '../../enums/DeltaType';
 import { CharacterService } from 'src/app/services/character.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-character-sheet',
@@ -39,8 +40,8 @@ export class CharacterSheetComponent implements OnInit {
     })
     if (id) {
       this.character = await this.getCharacter(id);
+      this.deltas = new DeltaGroup(this.character, this.lookupTables);
     }
-    this.deltas = new DeltaGroup(this.character, this.lookupTables);
   }
 
   async getCharacter(id: number) {
@@ -130,37 +131,26 @@ export class CharacterSheetComponent implements OnInit {
     const key = rank.replacesStatus ? 'rankReplacesStatus' : 'rank';
     return this.lookupTables.cost(key) * rank.rank;
   }
-
-  rankPointTotal() {
-    let total = this.getRankCost(this.newRank);
-    for (const rank of this.deltas.moddedValue('ranks')) {
-      total += this.getRankCost(rank);
-    }
-    return total;
-  }
   
   addRank() {
     if (this.newRank.organization) {
       this.deltas.pushToArray('ranks', this.newRank);
-      const ranksDelta = this.deltas.getOrCreate('ranks', DeltaType.Array);
-      if (!ranksDelta.customCostFunction) {
-        ranksDelta.customCostFunction = 
-        () => {
-          return this.rankPointTotal();
-        }
-      }
+      this.setRankCustomCost();
       this.newRank = Rank.blank();
     }
   }
   
   removeRank(rank: Rank) {
     this.deltas.removeFromArray('ranks', rank);
+    this.setRankCustomCost();
   }
 
   changeRankOrganization(organization: string, rank?: Rank, index?: number) {
     if (rank) {
-      rank.organization = organization;
-      this.deltas.changeArray('ranks', rank, index);
+      let changedRank = _.clone(rank);
+      changedRank.organization = organization;
+      this.deltas.changeArray('ranks', changedRank, index);
+      this.setRankCustomCost();
     } else {
       this.newRank.organization = organization;
     }
@@ -168,16 +158,20 @@ export class CharacterSheetComponent implements OnInit {
 
   increaseRank(rank?: Rank, index?: number) {
     this.changeRankRank(this.lookupTables.increment('rank'), rank, index);
+    this.setRankCustomCost();
   }
 
   decreaseRank(rank?: Rank, index?: number) {
     this.changeRankRank(-this.lookupTables.increment('rank'), rank, index);
+    this.setRankCustomCost();
   }
 
   changeRankRank(changeAmt: number, rank: Rank, index: number) {
     if (rank) {
-      rank.rank += changeAmt;
-      this.deltas.changeArray('ranks', rank, index);
+      let changedRank = _.clone(rank);
+      changedRank.rank += changeAmt;
+      this.deltas.changeArray('ranks', changedRank, index);
+      this.setRankCustomCost();
     } else {
       this.newRank.rank += changeAmt;
     }
@@ -185,8 +179,10 @@ export class CharacterSheetComponent implements OnInit {
 
   changeRankDescription(description: string, rank?: Rank, index?: number) {
     if (rank) {
-      rank.description = description;
-      this.deltas.changeArray('ranks', rank, index);
+      let changedRank = _.clone(rank);
+      changedRank.description = description;
+      this.deltas.changeArray('ranks', changedRank, index);
+      this.setRankCustomCost();
     } else {
       this.newRank.description = description;
     }
@@ -194,10 +190,22 @@ export class CharacterSheetComponent implements OnInit {
 
   changeRankReplacesStatus(rank?: Rank, index?: number) {
     if (rank) {
-      rank.replacesStatus = !rank.replacesStatus;
-      this.deltas.changeArray('ranks', rank, index);
+      let changedRank = _.clone(rank);
+      changedRank.replacesStatus = !changedRank.replacesStatus;
+      this.deltas.changeArray('ranks', changedRank, index);
+      this.setRankCustomCost();
     } else {
       this.newRank.replacesStatus = !this.newRank.replacesStatus;
+    }
+  }
+
+  setRankCustomCost() {
+    const ranksDelta = this.deltas.getOrCreate('ranks', DeltaType.Array);
+    if (!ranksDelta.customCostFunction) {
+      ranksDelta.customCostFunction = 
+      (rank: Rank) => {
+        return this.getRankCost(rank);
+      }
     }
   }
   
@@ -374,9 +382,7 @@ export class CharacterSheetComponent implements OnInit {
     if(!this.deltas.has('reputations')) {
       pointTotal += this.reputationPointTotal();
     }
-    if(!this.deltas.has('rank')) {
-      pointTotal += this.rankPointTotal();
-    }
+    pointTotal += this.getRankCost(this.newRank);
     return pointTotal;
   }
 
@@ -385,7 +391,6 @@ export class CharacterSheetComponent implements OnInit {
       this.deltas.moddedValue('status'),
       this.moddedAndNewArray('ranks', this.newRank),
       this.lookupTables);
-    return this.deltas.moddedValue('status');
   }
 
   moddedAndNewArray(attribute: string, newObject: Object) {

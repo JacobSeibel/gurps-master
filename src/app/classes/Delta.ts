@@ -11,8 +11,8 @@ export class Delta {
     
     constructor(oldValue: any, type: DeltaType) {
         this.oldValue = oldValue;
-        if (this.type == DeltaType.Array) {
-            this.newValue = (oldValue as any[]).concat([]);
+        if (type === DeltaType.Array) {
+            this.newValue = [...oldValue];
         } else {
             this.newValue = oldValue;
         }
@@ -60,20 +60,71 @@ export class Delta {
     }
 
     cost(attribute: string, lookupTables: LookupTablesService) {
-        if (this.customCostFunction) return this.customCostFunction();
+        if (this.type != DeltaType.Array && this.customCostFunction) return this.customCostFunction();
         const newKey = this.type == DeltaType.Enum ? attribute + this.newValue : attribute;
         const oldKey = this.type == DeltaType.Enum ? attribute + this.oldValue : attribute;
         const newPrice = lookupTables.cost(newKey);
         const oldPrice = lookupTables.cost(oldKey);
         switch (this.type) {
+            case DeltaType.Array:
+                console.log('Calculating array cost');
+                return this.calculateArrayCost();
             case DeltaType.Number:
-                const increment = lookupTables.increment(newKey);
-                return (this.newValue - this.oldValue) * newPrice / increment;
+                return this.calculateNumberCost(newKey, newPrice, lookupTables);
             case DeltaType.String:
-                return 0;
+                return this.calculateStringCost();
             case DeltaType.Boolean:
+                return this.calculateBooleanCost(newPrice, oldPrice);
             case DeltaType.Enum:
-                return newPrice - oldPrice;
+                return this.calculateEnumCost(newPrice, oldPrice);
         }
+    }
+
+    private calculateArrayCost() {
+        let cost = 0;
+        if (!this.customCostFunction) {
+            throwError("Array type deltas require a custom cost function. Returning 0 cost.");
+            return 0;
+        }
+        let addedValues = [...this.newValue];
+        let removedValues = [];
+        for (const oldValue of this.oldValue) {
+            let found = false;
+            for (const newValue of this.newValue) {
+                if (oldValue.id === newValue.id) {
+                    cost += this.customCostFunction(newValue) - this.customCostFunction(oldValue);
+                    addedValues.splice(addedValues.indexOf(newValue), 1);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                removedValues.push(oldValue);
+            }
+        }
+        for (const added of addedValues) {
+            cost += this.customCostFunction(added);
+        }
+        for (const removed of removedValues) {
+            cost -= this.customCostFunction(removed);
+        }
+        return cost;
+    }
+
+    private calculateNumberCost(newKey, newPrice, lookupTables: LookupTablesService) {
+        const increment = lookupTables.increment(newKey);
+        return this.valueChange() * newPrice / increment;
+    }
+
+    private calculateStringCost() {
+        return 0;
+    }
+
+    private calculateBooleanCost(newPrice, oldPrice) {
+        return newPrice - oldPrice;
+    }
+
+    private calculateEnumCost(newPrice, oldPrice) {
+        return newPrice - oldPrice;
     }
 }
