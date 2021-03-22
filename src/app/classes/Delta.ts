@@ -67,7 +67,6 @@ export class Delta {
         const oldPrice = lookupTables.cost(oldKey);
         switch (this.type) {
             case DeltaType.Array:
-                console.log('Calculating array cost');
                 return this.calculateArrayCost();
             case DeltaType.Number:
                 return this.calculateNumberCost(newKey, newPrice, lookupTables);
@@ -81,6 +80,7 @@ export class Delta {
     }
 
     private calculateArrayCost() {
+        debugger
         let cost = 0;
         if (!this.customCostFunction) {
             throwError("Array type deltas require a custom cost function. Returning 0 cost.");

@@ -24,7 +24,7 @@ export class CharacterSheetComponent implements OnInit {
   deltas: DeltaGroup = new DeltaGroup(this.character, this.lookupTables);
   activeModifiers: ModifierGroup = new ModifierGroup();
 
-  newLanguage = new Language('', 3, undefined);
+  newLanguage = new Language('', 0, undefined);
   newReputation = new Reputation('', 0, 0, '', 0, false);
   newRank = new Rank('', 0, '', false);
 
@@ -85,16 +85,50 @@ export class CharacterSheetComponent implements OnInit {
     }
   }
 
-  languagePointTotal() {
-    const languages = this.deltas.moddedValue('languages');
-    let total = 0;
-    let freeNative = true;
-    for (const language of languages) {
-      total += this.getLanguageCost(language, freeNative);
-      freeNative = false;
-    } 
-    total += this.getLanguageCost(this.newLanguage, freeNative);
-    return total;
+  updateLanguageName(name: string, language?: Language, index?: number) {
+    if (!language) {
+      this.newLanguage.name = name;
+    } else {
+      let changedLanguage = _.clone(language);
+      changedLanguage.name = name;
+      this.deltas.changeArray('languages', changedLanguage, index);
+      this.setLanguageCustomCost();
+    }
+  }
+  
+  updateLanguageSpokenComprehension(spokenComprehension: number, language?: Language, index?: number) {
+    if (!language) {
+      this.newLanguage.spokenComprehension = spokenComprehension;
+    } else {
+      let changedLanguage = _.clone(language);
+      changedLanguage.spokenComprehension = spokenComprehension;
+      this.deltas.changeArray('languages', changedLanguage, index);
+      this.setLanguageCustomCost();
+    }
+  }
+  
+  updateLanguageWrittenComprehension(writtenComprehension: number, language?: Language, index?: number) {
+    if (!language) {
+      this.newLanguage.writtenComprehension = writtenComprehension;
+    } else {
+      let changedLanguage = _.clone(language);
+      changedLanguage.writtenComprehension = writtenComprehension;
+      this.deltas.changeArray('languages', changedLanguage, index);
+      this.setLanguageCustomCost();
+    }
+  }
+  
+  addLanguage() {
+    if (this.newLanguage.name !== '' && (this.newLanguage.spokenComprehension != 0 || this.newLanguage.effectiveWrittenComprehension != 0)) {
+      this.deltas.pushToArray('languages', this.newLanguage);
+      this.setLanguageCustomCost();
+      this.newLanguage = Language.blank();
+    }
+  }
+  
+  removeLanguage(language: Language) {
+    this.deltas.removeFromArray('languages', language);
+    this.setLanguageCustomCost();
   }
 
   getLanguageCost(language: Language, freeNative?: boolean) {
@@ -102,6 +136,16 @@ export class CharacterSheetComponent implements OnInit {
     const spokenCost = this.lookupTables.cost('language', language.spokenComprehension)/2;
     const writtenCost = this.lookupTables.cost('language', language.effectiveWrittenComprehension)/2;
     return spokenCost + writtenCost - nativeDiscount;
+  }
+
+  setLanguageCustomCost() {
+    const languagesDelta = this.deltas.getOrCreate('languages', DeltaType.Array);
+    if (!languagesDelta.customCostFunction) {
+      languagesDelta.customCostFunction = 
+        (language: Language) => {
+          return this.getLanguageCost(language);
+        }
+    }
   }
 
   getReputationCost(reputation: Reputation) {
@@ -113,14 +157,6 @@ export class CharacterSheetComponent implements OnInit {
     cost = this.lookupTables.cost('repFrequency', reputation.frequency) * cost;
     cost = Math.floor(cost);
     return cost;
-  }
-
-  reputationPointTotal() {
-    let total = this.getReputationCost(this.newReputation);
-    for (const reputation of this.deltas.moddedValue('reputations')) {
-      total += this.getReputationCost(reputation);
-    }
-    return total;
   }
 
   getStatusCost() {
@@ -212,25 +248,22 @@ export class CharacterSheetComponent implements OnInit {
   addReputation() {
     if (this.newReputation.description !== '' && (this.newReputation.scope == 0 || this.newReputation.group !== '')) {
       this.deltas.pushToArray('reputations', this.newReputation);
-      const reputationsDelta = this.deltas.getOrCreate('reputations', DeltaType.Array);
-      if (!reputationsDelta.customCostFunction) {
-        reputationsDelta.customCostFunction = 
-          () => {
-            return this.reputationPointTotal();
-          }
-      }
+      this.setReputationCustomCost();
       this.newReputation = Reputation.blank();
     }
   }
   
   removeReputation(reputation: Reputation) {
     this.deltas.removeFromArray('reputations', reputation);
+    this.setReputationCustomCost();
   }
 
   changeReputationDescription(description: string, reputation?: Reputation, index?: number) {
     if (reputation) {
-      reputation.description = description;
-      this.deltas.changeArray('reputations', reputation, index);
+      let changedReputation = _.clone(reputation);
+      changedReputation.description = description;
+      this.deltas.changeArray('reputations', changedReputation, index);
+      this.setReputationCustomCost();
     } else {
       this.newReputation.description = description;
     }
@@ -238,8 +271,10 @@ export class CharacterSheetComponent implements OnInit {
 
   changeReputationScope(scope: number, reputation?: Reputation, index?: number) {
     if (reputation) {
-      reputation.scope = scope;
-      this.deltas.changeArray('reputations', reputation, index);
+      let changedReputation = _.clone(reputation);
+      changedReputation.scope = scope;
+      this.deltas.changeArray('reputations', changedReputation, index);
+      this.setReputationCustomCost();
     } else {
       this.newReputation.scope = scope;
     }
@@ -247,8 +282,10 @@ export class CharacterSheetComponent implements OnInit {
 
   changeReputationGroup(group: string, reputation?: Reputation, index?: number) {
     if (reputation) {
-      reputation.group = group;
-      this.deltas.changeArray('reputations', reputation, index);
+      let changedReputation = _.clone(reputation);
+      changedReputation.group = group;
+      this.deltas.changeArray('reputations', changedReputation, index);
+      this.setReputationCustomCost();
     } else {
       this.newReputation.group = group;
     }
@@ -256,8 +293,10 @@ export class CharacterSheetComponent implements OnInit {
 
   changeReputationFrequency(frequency: number, reputation?: Reputation, index?: number) {
     if (reputation) {
-      reputation.frequency = frequency;
-      this.deltas.changeArray('reputations', reputation, index);
+      let changedReputation = _.clone(reputation);
+      changedReputation.frequency = frequency;
+      this.deltas.changeArray('reputations', changedReputation, index);
+      this.setReputationCustomCost();
     } else {
       this.newReputation.frequency = frequency;
     }
@@ -265,8 +304,10 @@ export class CharacterSheetComponent implements OnInit {
 
   changeReputationFree(reputation?: Reputation, index?: number) {
     if (reputation) {
-      reputation.free = !reputation.free;
-      this.deltas.changeArray('reputations', reputation, index);
+      let changedReputation = _.clone(reputation);
+      changedReputation.free = !reputation.free;
+      this.deltas.changeArray('reputations', changedReputation, index);
+      this.setReputationCustomCost();
     } else {
       this.newReputation.free = !this.newReputation.free;
     }
@@ -288,56 +329,23 @@ export class CharacterSheetComponent implements OnInit {
 
   changeReputationReaction(changeAmt: number, reputation: Reputation, index: number) {
     if (reputation) {
-      reputation.reaction += changeAmt;
-      this.deltas.changeArray('reputations', reputation, index);
+      let changedReputation = _.clone(reputation);
+      changedReputation.reaction += changeAmt;
+      this.deltas.changeArray('reputations', changedReputation, index);
+      this.setReputationCustomCost();
     } else {
       this.newReputation.reaction += changeAmt;
     }
   }
-  
-  updateLanguageName(name: string, language?: Language, index?: number) {
-    if (!language) {
-      this.newLanguage.name = name;
-    } else {
-      language.name = name;
-      this.deltas.changeArray('languages', language, index);
+
+  setReputationCustomCost() {
+    const reputationsDelta = this.deltas.getOrCreate('reputations', DeltaType.Array);
+    if (!reputationsDelta.customCostFunction) {
+      reputationsDelta.customCostFunction = 
+        (reputation: Reputation) => {
+          return this.getReputationCost(reputation);
+        }
     }
-  }
-  
-  updateLanguageSpokenComprehension(spokenComprehension: number, language?: Language, index?: number) {
-    if (!language) {
-      this.newLanguage.spokenComprehension = spokenComprehension;
-    } else {
-      language.spokenComprehension = spokenComprehension;
-      this.deltas.changeArray('languages', language, index);
-    }
-  }
-  
-  updateLanguageWrittenComprehension(writtenComprehension: number, language?: Language, index?: number) {
-    if (!language) {
-      this.newLanguage.writtenComprehension = writtenComprehension;
-    } else {
-      language.writtenComprehension = writtenComprehension;
-      this.deltas.changeArray('languages', language, index);
-    }
-  }
-  
-  addLanguage() {
-    if (this.newLanguage.name !== '' && (this.newLanguage.spokenComprehension != 0 || this.newLanguage.effectiveWrittenComprehension != 0)) {
-      this.deltas.pushToArray('languages', this.newLanguage);
-      const languagesDelta = this.deltas.getOrCreate('languages', DeltaType.Array);
-      if (!languagesDelta.customCostFunction) {
-        languagesDelta.customCostFunction = 
-          () => {
-            return this.languagePointTotal();
-          }
-      }
-      this.newLanguage = Language.blank();
-    }
-  }
-  
-  removeLanguage(language: Language) {
-    this.deltas.removeFromArray('languages', language);
   }
 
   changeWealth(value: number) {
@@ -376,13 +384,13 @@ export class CharacterSheetComponent implements OnInit {
 
   getLiveCost() {
     let pointTotal = this.deltas.cost(this.activeModifiers);
-    if(!this.deltas.has('languages')) {
-      pointTotal += this.languagePointTotal();
-    }
-    if(!this.deltas.has('reputations')) {
-      pointTotal += this.reputationPointTotal();
-    }
     pointTotal += this.getRankCost(this.newRank);
+    pointTotal += this.getReputationCost(this.newReputation);
+    // Since we are calculating total cost, it doesn't matter that the free native language discount is
+    // applied to the exact right Language, and passing that info into the custom cost function is hairy.
+    // Therefore, if there is only a new language, we'll just flat reduce total by the native discount
+    const onlyNewLanguage = this.deltas.moddedValue('languages').length == 0;
+    pointTotal += this.getLanguageCost(this.newLanguage, onlyNewLanguage);
     return pointTotal;
   }
 

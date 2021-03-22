@@ -91,6 +91,7 @@ export class DeltaGroup {
     cost(activeModifiers: ModifierGroup) {
         let totalCost = 0;
         this.deltas.forEach((delta, attribute) => {
+            if (attribute === 'languages') debugger;
             const cost = delta.cost(attribute, this.lookupTables);
             const discount = activeModifiers.getTotalDiscount(attribute, this.lookupTables.maxDiscount(attribute));
             totalCost += Math.round(cost - (cost * discount));
