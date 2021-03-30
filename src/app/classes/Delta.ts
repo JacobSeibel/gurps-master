@@ -23,8 +23,14 @@ export class Delta {
         return this.newValue;
     }
 
-    valueChange() {
-        return this.newValue - this.oldValue;
+    valueChange(attribute?: string) {
+        let newValue = this.newValue;
+        let oldValue = this.oldValue;
+        if (attribute) {
+            newValue = this.newValue[attribute];
+            oldValue = this.oldValue[attribute];
+        }
+        return newValue - oldValue;
     }
 
     increaseValue(amount: number) {
@@ -59,8 +65,14 @@ export class Delta {
         }
     }
 
+    /**
+     * Calculates the cost of this particular Delta.
+     * @param attribute The string to pass into the lookup tables to find the cost
+     * @param lookupTables The lookup tables service
+     * @param flag A boolean used as a catch-all for special cases
+     */
     cost(attribute: string, lookupTables: LookupTablesService) {
-        if (this.type != DeltaType.Array && this.customCostFunction) return this.customCostFunction();
+        if (!DeltaType.requiresCustomCostFunction(this.type)) return this.customCostFunction();
         const newKey = this.type == DeltaType.Enum ? attribute + this.newValue : attribute;
         const oldKey = this.type == DeltaType.Enum ? attribute + this.oldValue : attribute;
         const newPrice = lookupTables.cost(newKey);
@@ -76,11 +88,12 @@ export class Delta {
                 return this.calculateBooleanCost(newPrice, oldPrice);
             case DeltaType.Enum:
                 return this.calculateEnumCost(newPrice, oldPrice);
+            case DeltaType.Object:
+                return this.calculateObjectCost();
         }
     }
 
     private calculateArrayCost() {
-        debugger
         let cost = 0;
         if (!this.customCostFunction) {
             throwError("Array type deltas require a custom cost function. Returning 0 cost.");
@@ -126,5 +139,13 @@ export class Delta {
 
     private calculateEnumCost(newPrice, oldPrice) {
         return newPrice - oldPrice;
+    }
+
+    private calculateObjectCost() {
+        if (!this.customCostFunction) {
+            throwError("Object type deltas require a custom cost function. Returning 0 cost.");
+            return 0;
+        }
+        return this.customCostFunction(this.oldValue, this.newValue);
     }
 }

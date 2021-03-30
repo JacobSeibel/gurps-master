@@ -10,6 +10,7 @@ import { DeltaType } from '../../enums/DeltaType';
 import { CharacterService } from 'src/app/services/character.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import * as _ from 'lodash';
+import { Appearance } from 'src/app/classes/Appearance';
 
 @Component({
   selector: 'app-character-sheet',
@@ -67,19 +68,53 @@ export class CharacterSheetComponent implements OnInit {
     this.activeModifiers.setModifier('hp', 0, 0, sizeModifierDiscount, 'size');
   }
 
-  changeAppearanceValue(attribute: string, newValue: number | boolean) {
-    if (typeof(newValue) === 'number') {
-      this.deltas.changeEnum(attribute, newValue);
-    } else {
-      this.deltas.changeBoolean(attribute, newValue);
-    }
-    const appearanceDelta = this.deltas.getOrCreate('appearance', DeltaType.Enum);
+  changeAppearanceAppearance(appearance: number) {
+    let changedAppearance = _.clone(this.deltas.moddedValue('appearance'));
+    changedAppearance.appearance = appearance;
+    this.changeAppearance(changedAppearance);
+  }
+
+  changeAppearanceDescription(description: string) {
+    let changedAppearance = _.clone(this.deltas.moddedValue('appearance'));
+    changedAppearance.description = description;
+    this.changeAppearance(changedAppearance);
+  }
+
+  changeAppearanceAndrogynous(androgynous: boolean) {
+    let changedAppearance = _.clone(this.deltas.moddedValue('appearance'));
+    changedAppearance.androgynous = androgynous;
+    this.changeAppearance(changedAppearance);
+  }
+
+  changeAppearanceImpressive(impressive: boolean) {
+    let changedAppearance = _.clone(this.deltas.moddedValue('appearance'));
+    changedAppearance.impressive = impressive;
+    this.changeAppearance(changedAppearance);
+  }
+
+  changeAppearanceUniversal(universal: boolean) {
+    let changedAppearance = _.clone(this.deltas.moddedValue('appearance'));
+    changedAppearance.universal = universal;
+    this.changeAppearance(changedAppearance);
+  }
+
+  changeAppearanceOffTheShelfLooks(offTheShelfLooks: boolean) {
+    let changedAppearance = _.clone(this.deltas.moddedValue('appearance'));
+    changedAppearance.offTheShelfLooks = offTheShelfLooks;
+    this.changeAppearance(changedAppearance);
+  }
+
+  changeAppearance(changedAppearance: Appearance) {
+    this.deltas.changeObject('appearance', changedAppearance);
+    const appearanceDelta = this.deltas.getOrCreate('appearance', DeltaType.Object);
     if (!appearanceDelta.customCostFunction) {
       appearanceDelta.customCostFunction = 
-        () => {
-          const total = this.lookupTables.cost('appearance', this.deltas.moddedValue('appearance'));
-          let discount = this.deltas.moddedValue('universal') ? -.25 : 0;
-          discount += this.deltas.moddedValue('offTheShelfLooks') ? .5 : 0;
+        (oldAppearance: Appearance, newAppearance: Appearance) => {
+          debugger
+          const total = this.lookupTables.cost('appearance', newAppearance.appearance)
+                        - this.lookupTables.cost('appearance', oldAppearance.appearance);
+          let discount = newAppearance.universal ? -.25 : 0;
+          discount += newAppearance.offTheShelfLooks ? .5 : 0;
           return Math.round(total - (total * discount));
         }
     }
@@ -430,11 +465,11 @@ export class CharacterSheetComponent implements OnInit {
   }
   
   get appearance() {
-    return this.deltas.moddedValue('appearance');
+    return this.deltas.moddedValue('appearance').appearance;
   }
 
   get appearanceDescription() {
-    return this.deltas.moddedValue('appearanceDescription');
+    return this.deltas.moddedValue('appearance').description;
   }
 
   get build() {
@@ -584,18 +619,18 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   get androgynous() {
-    return this.deltas.moddedValue('androgynous');
+    return this.deltas.moddedValue('appearance').androgynous;
   }
 
   get impressive() {
-    return this.deltas.moddedValue('impressive');
+    return this.deltas.moddedValue('appearance').impressive;
   }
 
   get universal() {
-    return this.deltas.moddedValue('universal');
+    return this.deltas.moddedValue('appearance').universal;
   }
 
   get offTheShelfLooks() {
-    return this.deltas.moddedValue('offTheShelfLooks');
+    return this.deltas.moddedValue('appearance').offTheShelfLooks;
   }
 }

@@ -5,6 +5,7 @@ import { LookupTablesService } from './lookup-tables.service';
 import { Language } from '../classes/Language';
 import { Reputation } from '../classes/Reputation';
 import { Rank } from '../classes/Rank';
+import { Appearance } from '../classes/Appearance';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +38,17 @@ export class CharacterService {
     let hydratedCharacter = new Character(this.lookupTablesService, character.availablePoints);
     for (let key of Object.keys(character)) {
       let value = character[key];
+      if (key === 'appearance') {
+        value = new Appearance(
+          character[key].appearance,
+          character[key].description,
+          character[key].androgynous,
+          character[key].impressive,
+          character[key].universal,
+          character[key].offTheShelfLooks
+        );
+        value.id = character[key].id;
+      }
       if (key === 'languages') {
         value = [];
         let incomingLanguages = character[key];
@@ -44,7 +56,8 @@ export class CharacterService {
           let newLang = new Language(
             incomingLanguage.name,
             incomingLanguage.spokenComprehension,
-            incomingLanguage.writtenComprehension);
+            incomingLanguage.writtenComprehension
+          );
           newLang.id = incomingLanguage.id;
           value.push(newLang);
         }
@@ -59,7 +72,7 @@ export class CharacterService {
             incomingReputation.group,
             incomingReputation.frequency,
             incomingReputation.free
-          )
+          );
           newRep.id = incomingReputation.id;
           value.push(newRep);
         }
@@ -72,7 +85,7 @@ export class CharacterService {
             incomingRank.rank,
             incomingRank.description,
             incomingRank.replacesStatus
-          )
+          );
           newRank.id = incomingRank.id;
           value.push(newRank);
         }

@@ -3,5 +3,12 @@ export enum DeltaType {
     String,
     Boolean,
     Enum,
-    Array
+    Array,
+    Object
+}
+
+export namespace DeltaType {
+    export function requiresCustomCostFunction(type: DeltaType) {
+        return type === DeltaType.Array || type === DeltaType.Object;
+    }
 }

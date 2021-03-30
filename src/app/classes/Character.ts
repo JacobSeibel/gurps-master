@@ -1,4 +1,5 @@
 import { LookupTablesService } from "../services/lookup-tables.service";
+import { Appearance } from "./Appearance";
 import { Language } from "./Language";
 import { Rank } from "./Rank";
 import { Reputation } from "./Reputation";
@@ -14,8 +15,7 @@ export class Character {
   player = '';
   height = '';
   weight = '';
-  appearanceDescription = '';
-  appearance = 5;
+  appearance: Appearance = Appearance.blank();
   build = 1;
   size = 0;
 
@@ -32,12 +32,6 @@ export class Character {
   will = this.iq;
   per = this.iq;
   fp = this.ht;
-
-  // APPEARANCE CHECKBOXES
-  androgynous = false;
-  impressive = false;
-  universal = false;
-  offTheShelfLooks = false;
 
   // LANGUAGE
   languages: Language[] = [];

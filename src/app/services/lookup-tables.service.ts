@@ -122,7 +122,7 @@ export class LookupTablesService {
   cost(stat: string, id?: number): number {
     let key = stat;
     let curId = id;
-    if (curId != undefined) {
+    if (curId != undefined && +curId) {
       key = stat + curId;
       while (!(key in this.COST_TABLE)) {
         curId--;

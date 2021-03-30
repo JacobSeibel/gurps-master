@@ -72,6 +72,10 @@ export class DeltaGroup {
         this.changeValue(attribute, newValue, DeltaType.Array, index);
     }
 
+    changeObject(attribute: string, newValue: any) {
+        this.changeValue(attribute, newValue, DeltaType.Object);
+    }
+
     pushToArray(attribute: string, newValue: any) {
         const delta = this.getOrCreate(attribute, DeltaType.Array);
         (delta.moddedValue() as any[]).push(newValue);

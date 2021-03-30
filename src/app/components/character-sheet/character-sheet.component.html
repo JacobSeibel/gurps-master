@@ -37,7 +37,7 @@
 	</tr>
 	<tr>
 		<td>
-			<select [value]="appearance" (input)="changeAppearanceValue('appearance', $event.target.value)">
+			<select [value]="appearance" (input)="changeAppearanceAppearance($event.target.value)">
 				<option value=0>Horrific</option>
 				<option value=1>Monstrous</option>
 				<option value=2>Hideous</option>
@@ -50,7 +50,7 @@
 				<option value=9>Transcendent</option>
 			</select>
 		</td>
-		<td><input [value]="appearanceDescription" (input)="deltas.changeString('appearanceDescription', $event.target.value)"/></td>
+		<td><input [value]="appearanceDescription" (input)="changeAppearanceDescription($event.target.value)"/></td>
 		<td><select [value]="build" (input)="deltas.changeEnum('build', $event.target.value)">
 			<option value=0>Skinny</option>
 			<option value=1>Average</option>
@@ -61,10 +61,10 @@
 	</tr>
 	<tr>
 		<td>
-			<input type="checkbox" [checked]= "androgynous" (change)= "changeAppearanceValue('androgynous', !androgynous)"> Androgynous <br>
-			<input type="checkbox" [checked]= "impressive" (change)= "changeAppearanceValue('impressive', !impressive)"> Impressive <br>
-			<input type="checkbox" [checked]= "universal" (change)= "changeAppearanceValue('universal', !universal)"> Universal <br>
-			<input type="checkbox" [checked]= "offTheShelfLooks" (change)= "changeAppearanceValue('offTheShelfLooks', !offTheShelfLooks)"> Off-the-Shelf Looks
+			<input type="checkbox" [checked]= "androgynous" (change)= "changeAppearanceAndrogynous(!androgynous)"> Androgynous <br>
+			<input type="checkbox" [checked]= "impressive" (change)= "changeAppearanceImpressive(!impressive)"> Impressive <br>
+			<input type="checkbox" [checked]= "universal" (change)= "changeAppearanceUniversal(!universal)"> Universal <br>
+			<input type="checkbox" [checked]= "offTheShelfLooks" (change)= "changeAppearanceOffTheShelfLooks(!offTheShelfLooks)"> Off-the-Shelf Looks
 		</td>
 	</tr>
 </table>
