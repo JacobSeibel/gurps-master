@@ -6,6 +6,7 @@ import { Language } from '../classes/Language';
 import { Reputation } from '../classes/Reputation';
 import { Rank } from '../classes/Rank';
 import { Appearance } from '../classes/Appearance';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,13 +17,13 @@ export class CharacterService {
 
   characters(): Promise<HttpResponse<{characters: Character[]}>> {
     return this.http.get<{characters: Character[]}>(
-      "http://127.0.0.1:5000/character",
+      environment.apiUrl + "character",
       {observe: 'response'}).toPromise();
   }
 
   character(id: number): Promise<HttpResponse<Character>> {
     return this.http.get<Character>(
-      `http://127.0.0.1:5000/character/${id}`,
+      environment.apiUrl + `character/${id}`,
       {observe: 'response'}).toPromise();
   }
 
