@@ -72,7 +72,9 @@ export class Delta {
      * @param flag A boolean used as a catch-all for special cases
      */
     cost(attribute: string, lookupTables: LookupTablesService) {
-        if (!DeltaType.requiresCustomCostFunction(this.type)) return this.customCostFunction();
+        if (!DeltaType.requiresCustomCostFunction(this.type) && this.customCostFunction) {
+            return this.customCostFunction();
+        }
         const newKey = this.type == DeltaType.Enum ? attribute + this.newValue : attribute;
         const oldKey = this.type == DeltaType.Enum ? attribute + this.oldValue : attribute;
         const newPrice = lookupTables.cost(newKey);

@@ -11,6 +11,7 @@ import { CharacterService } from 'src/app/services/character.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import * as _ from 'lodash';
 import { Appearance } from 'src/app/classes/Appearance';
+import { AlertService } from '../_alert';
 
 @Component({
   selector: 'app-character-sheet',
@@ -31,7 +32,8 @@ export class CharacterSheetComponent implements OnInit {
 
   constructor(private lookupTables: LookupTablesService,
               private characterService: CharacterService,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private alertService: AlertService) {
   }
   
   async ngOnInit() {
@@ -48,6 +50,12 @@ export class CharacterSheetComponent implements OnInit {
   async getCharacter(id: number) {
     const unhydratedCharacter = (await this.characterService.character(id)).body;
     return this.characterService.hydrateCharacter(unhydratedCharacter);
+  }
+
+  saveCharacter() {
+    const deltaCharacter = this.deltas.getDeltaObject(this.pointValue, this.availablePoints);
+    this.characterService.update(deltaCharacter);
+    this.alertService.success(deltaCharacter.name + " saved!", {autoClose: true});
   }
 
   increaseSize() {
@@ -110,7 +118,6 @@ export class CharacterSheetComponent implements OnInit {
     if (!appearanceDelta.customCostFunction) {
       appearanceDelta.customCostFunction = 
         (oldAppearance: Appearance, newAppearance: Appearance) => {
-          debugger
           const total = this.lookupTables.cost('appearance', newAppearance.appearance)
                         - this.lookupTables.cost('appearance', oldAppearance.appearance);
           let discount = newAppearance.universal ? -.25 : 0;

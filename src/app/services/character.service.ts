@@ -27,6 +27,14 @@ export class CharacterService {
       {observe: 'response'}).toPromise();
   }
 
+  update(character: Character): Promise<HttpResponse<Character>> {
+    return this.http.put<Character>(
+      environment.apiUrl + "character",
+      character,
+      {observe: 'response'}
+    ).toPromise();
+  }
+
   hydrateCharacters(characters: Character[]) {
     const hydratedCharacters = [];
     for (const character of characters) {

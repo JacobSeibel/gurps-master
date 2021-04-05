@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 import { DeltaType } from "../enums/DeltaType";
 import { LookupTablesService } from "../services/lookup-tables.service";
 import { Delta } from "./Delta";
@@ -5,15 +6,25 @@ import { ModifierGroup } from "./Modifier";
 import { Rank } from "./Rank";
 
 export class DeltaGroup {
-    objectBeingChanged: Object;
+    objectBeingChanged: any;
     deltas: Map<string, Delta>;
     lookupTables: LookupTablesService;
     testing: Rank[];
 
-    constructor(objectBeingChanged: Object, lookupTables: LookupTablesService) {
+    constructor(objectBeingChanged: any, lookupTables: LookupTablesService) {
         this.objectBeingChanged = objectBeingChanged;
         this.deltas = new Map();
         this.lookupTables = lookupTables;
+    }
+
+    getDeltaObject(pointValue: number, availablePoints: number) {
+        let deltaObject = _.cloneDeep(this.objectBeingChanged);
+        this.deltas.forEach((delta: Delta, attribute: string) => {
+            deltaObject[attribute] = delta.moddedValue();
+        });
+        deltaObject.pointValue = pointValue;
+        deltaObject.availablePoints = availablePoints;
+        return deltaObject;
     }
 
     getOrCreate(attribute: string, type: DeltaType) {
