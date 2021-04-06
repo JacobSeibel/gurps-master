@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, OnChanges, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { LookupTablesService } from '../../services/lookup-tables.service';
 import { ModifierGroup } from '../../classes/Modifier';
 import { Language } from '../../classes/Language';
@@ -12,6 +12,7 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import * as _ from 'lodash';
 import { Appearance } from 'src/app/classes/Appearance';
 import { AlertService } from '../_alert';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-character-sheet',
@@ -26,6 +27,7 @@ export class CharacterSheetComponent implements OnInit {
   deltas: DeltaGroup = new DeltaGroup(this.character, this.lookupTables);
   activeModifiers: ModifierGroup = new ModifierGroup();
   enableRefunds: boolean = false;
+  isEdit: boolean = false;
 
   newLanguage = new Language('', 0, undefined);
   newReputation = new Reputation('', 0, 0, '', 0, false);
@@ -34,17 +36,20 @@ export class CharacterSheetComponent implements OnInit {
   constructor(private lookupTables: LookupTablesService,
               private characterService: CharacterService,
               private route: ActivatedRoute,
-              private alertService: AlertService) {
+              private alertService: AlertService,
+              private _location: Location) {
   }
   
   async ngOnInit() {
     let id: number;
+    debugger
     this.route.paramMap.subscribe((params: ParamMap) => {
       id = +params.get('id')
     })
     if (id) {
       this.character = await this.getCharacter(id);
       this.deltas = new DeltaGroup(this.character, this.lookupTables);
+      this.isEdit = true;
     }
   }
 
@@ -53,10 +58,39 @@ export class CharacterSheetComponent implements OnInit {
     return this.characterService.hydrateCharacter(unhydratedCharacter);
   }
 
+  back() {
+    this._location.back();
+  }
+
+  saveButtonText() {
+    return this.isEdit ? "Save" : "Create";
+  }
+
   saveCharacter() {
     const deltaCharacter = this.deltas.getDeltaObject(this.pointValue, this.availablePoints);
-    this.characterService.update(deltaCharacter);
-    this.alertService.success(deltaCharacter.name + " saved!", {autoClose: true});
+    if (this.validate(deltaCharacter)) {
+      if (this.isEdit) {
+        this.characterService.update(deltaCharacter);
+        this.alertService.success(deltaCharacter.name + " saved!", {autoClose: true});
+      } else {
+        this.characterService.insert(deltaCharacter);
+        this.alertService.success(deltaCharacter.name + " created!", {autoClose: true});
+      }
+    }
+  }
+
+  validate(c: Character) {
+    let v: boolean = this.required(c.name, "Name");
+    v = v && this.required(c.player, "Player");
+    return v;
+  }
+
+  required(value: any, field: string) {
+    if (!value) {
+      this.alertService.error(field + " is required!", {autoClose: true});
+      return false;
+    }
+    return true;
   }
 
   increaseSize() {
@@ -175,6 +209,7 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   getLanguageCost(language: Language, freeNative?: boolean) {
+    if (!language.name) return 0;
     const nativeDiscount = freeNative ? this.lookupTables.cost('language', 3) : 0;
     const spokenCost = this.lookupTables.cost('language', language.spokenComprehension)/2;
     const writtenCost = this.lookupTables.cost('language', language.effectiveWrittenComprehension)/2;
@@ -432,6 +467,7 @@ export class CharacterSheetComponent implements OnInit {
     // Since we are calculating total cost, it doesn't matter that the free native language discount is
     // applied to the exact right Language, and passing that info into the custom cost function is hairy.
     // Therefore, if there is only a new language, we'll just flat reduce total by the native discount
+    debugger
     const onlyNewLanguage = this.deltas.moddedValue('languages').length == 0;
     pointTotal += this.getLanguageCost(this.newLanguage, onlyNewLanguage);
     

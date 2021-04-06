@@ -1,3 +1,4 @@
+<button (click)="back()">Back</button>
 <alert></alert>
 <table>
 	<tr>
@@ -5,7 +6,7 @@
 			<h1>Character Sheet</h1>
 		</td>
 		<td>
-			<button (click)="saveCharacter()">Save</button>
+			<button (click)="saveCharacter()">{{saveButtonText()}}</button>
 		</td>
 		<td>
 			<input type="checkbox" [checked]="enableRefunds" (change)="enableRefunds = !enableRefunds">Enable Refunds

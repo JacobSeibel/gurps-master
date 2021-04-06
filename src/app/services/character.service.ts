@@ -35,6 +35,14 @@ export class CharacterService {
     ).toPromise();
   }
 
+  insert(character: Character): Promise<HttpResponse<Character>> {
+    return this.http.post<Character>(
+      environment.apiUrl + "character",
+      character,
+      {observe: 'response'}
+    ).toPromise();
+  }
+
   hydrateCharacters(characters: Character[]) {
     const hydratedCharacters = [];
     for (const character of characters) {
@@ -61,42 +69,48 @@ export class CharacterService {
       if (key === 'languages') {
         value = [];
         let incomingLanguages = character[key];
-        for (let incomingLanguage of incomingLanguages) {
-          let newLang = new Language(
-            incomingLanguage.name,
-            incomingLanguage.spokenComprehension,
-            incomingLanguage.writtenComprehension
-          );
-          newLang.id = incomingLanguage.id;
-          value.push(newLang);
+        if (incomingLanguages) {
+          for (let incomingLanguage of incomingLanguages) {
+            let newLang = new Language(
+              incomingLanguage.name,
+              incomingLanguage.spokenComprehension,
+              incomingLanguage.writtenComprehension
+            );
+            newLang.id = incomingLanguage.id;
+            value.push(newLang);
+          }
         }
       } else if (key === 'reputations') {
         value = [];
         let incomingReputations = character[key];
-        for (let incomingReputation of incomingReputations) {
-          let newRep = new Reputation(
-            incomingReputation.description,
-            incomingReputation.reaction,
-            incomingReputation.scope,
-            incomingReputation.group,
-            incomingReputation.frequency,
-            incomingReputation.free
-          );
-          newRep.id = incomingReputation.id;
-          value.push(newRep);
+        if (incomingReputations) {
+          for (let incomingReputation of incomingReputations) {
+            let newRep = new Reputation(
+              incomingReputation.description,
+              incomingReputation.reaction,
+              incomingReputation.scope,
+              incomingReputation.group,
+              incomingReputation.frequency,
+              incomingReputation.free
+            );
+            newRep.id = incomingReputation.id;
+            value.push(newRep);
+          }
         }
       } else if (key === 'ranks') {
         value = [];
         let incomingRanks = character[key];
-        for (let incomingRank of incomingRanks) {
-          let newRank = new Rank(
-            incomingRank.organization,
-            incomingRank.rank,
-            incomingRank.description,
-            incomingRank.replacesStatus
-          );
-          newRank.id = incomingRank.id;
-          value.push(newRank);
+        if (incomingRanks) {
+          for (let incomingRank of incomingRanks) {
+            let newRank = new Rank(
+              incomingRank.organization,
+              incomingRank.rank,
+              incomingRank.description,
+              incomingRank.replacesStatus
+            );
+            newRank.id = incomingRank.id;
+            value.push(newRank);
+          }
         }
       }
       hydratedCharacter[key] = value;
