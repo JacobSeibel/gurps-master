@@ -25,6 +25,7 @@ export class CharacterSheetComponent implements OnInit {
   character: Character = new Character(this.lookupTables, this.STARTING_POINTS);
   deltas: DeltaGroup = new DeltaGroup(this.character, this.lookupTables);
   activeModifiers: ModifierGroup = new ModifierGroup();
+  enableRefunds: boolean = false;
 
   newLanguage = new Language('', 0, undefined);
   newReputation = new Reputation('', 0, 0, '', 0, false);
@@ -424,7 +425,7 @@ export class CharacterSheetComponent implements OnInit {
     return this.lookupTables.cost('wealth', effectiveWealthLevel) + multimillionaireExtraCost;
   }
 
-  getLiveCost() {
+  getLiveCost(allowNegativeTotal?: boolean) {
     let pointTotal = this.deltas.cost(this.activeModifiers);
     pointTotal += this.getRankCost(this.newRank);
     pointTotal += this.getReputationCost(this.newReputation);
@@ -433,6 +434,10 @@ export class CharacterSheetComponent implements OnInit {
     // Therefore, if there is only a new language, we'll just flat reduce total by the native discount
     const onlyNewLanguage = this.deltas.moddedValue('languages').length == 0;
     pointTotal += this.getLanguageCost(this.newLanguage, onlyNewLanguage);
+    
+    if(!(this.enableRefunds || allowNegativeTotal) && pointTotal < 0) {
+      pointTotal = 0;
+    }
     return pointTotal;
   }
 
@@ -448,7 +453,7 @@ export class CharacterSheetComponent implements OnInit {
   }
 
   get pointValue() {
-    return this.character.pointValue + this.getLiveCost();
+    return this.character.pointValue + this.getLiveCost(true);
   }
   
   get name() {

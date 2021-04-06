@@ -7,6 +7,9 @@
 		<td>
 			<button (click)="saveCharacter()">Save</button>
 		</td>
+		<td>
+			<input type="checkbox" [checked]="enableRefunds" (change)="enableRefunds = !enableRefunds">Enable Refunds
+		</td>
 	</tr>
 </table>
 <table>
